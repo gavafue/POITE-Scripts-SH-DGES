@@ -1,15 +1,30 @@
 #!/bin/bash
 
+# Colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[1;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+MAGENTA='\033[1;35m'
+RESET='\033[0m'
+
 while true; do
   clear
-  echo "========== ASISTENTE POITE (Prof. Gabriel Vázquez) =========="
-  echo "1) 🌐 Red y conectividad"
-  echo "2) 👥 Usuarios y cuentas"
-  echo "3) 💻 Información del sistema"
-  echo "4) 🧹 Mantenimiento"
-  echo "0) Salir"
-  echo "====================================="
-  echo -n "Seleccione una opción: "
+  echo -e "${BLUE}========== ASISTENTE POITE (Prof. Gabriel Vázquez) ==========${RESET}"
+  echo -e "${CYAN}Bienvenido al asistente de administración de sistemas${RESET}"
+  echo -e "${CYAN}Este asistente está diseñado para ayudar en la administración de sistemas${RESET}"
+  echo -e "${CYAN}y facilitar tareas comunes de mantenimiento y configuración.${RESET}"
+  echo -e "${BLUE}==============================================================${RESET}"
+  echo -e "${MAGENTA}Por favor, seleccione una opción del menú:${RESET}"
+  echo -e "${YELLOW}=====================================${RESET}"
+  echo -e "${GREEN}1) 🌐 Red y conectividad${RESET}"
+  echo -e "${GREEN}2) 👥 Usuarios y cuentas${RESET}"
+  echo -e "${GREEN}3) 💻 Información del sistema${RESET}"
+  echo -e "${GREEN}4) 🧹 Mantenimiento${RESET}"
+  echo -e "${RED}0) Salir${RESET}"
+  echo -e "${YELLOW}=====================================${RESET}"
+  echo -ne "${BLUE}Seleccione una opción: ${RESET}"
   read opcion
 
   case $opcion in
@@ -17,17 +32,9 @@ while true; do
     2) bash ./submenus/usuarios.sh ;;
     3) bash ./submenus/sistema.sh ;;
     4) bash ./submenus/mantenimiento.sh ;;
-    0) echo "Saliendo..."; break ;;
-    *) echo "Opción inválida"; read ;;
+    0) echo -e "${RED}Saliendo...${RESET}"; break ;;
+    *) echo -e "${RED}Opción inválida. Presione Enter para continuar...${RESET}"; read ;;
   esac
 done
-echo "Gracias por usar el asistente. ¡Hasta luego!"
-# Fin del script
-# Este script es un menú principal para un asistente de administración de sistemas.
-# Permite al usuario seleccionar diferentes opciones relacionadas con la red, usuarios, información del sistema y mantenimiento.
-# Cada opción ejecuta un script diferente ubicado en la carpeta "submenus".
-# El script se ejecuta en un bucle infinito hasta que el usuario selecciona la opción de salir (0).
-# Se utiliza "clear" para limpiar la pantalla antes de mostrar el menú.
-# El menú incluye una cabecera con el nombre del asistente y un pie de página que agradece al usuario por usar el asistente.
-# El script utiliza "read" para capturar la entrada del usuario y "case" para manejar las diferentes opciones seleccionadas.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+
+echo -e "${GREEN}Gracias por usar el asistente. ¡Hasta luego!${RESET}"

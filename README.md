@@ -25,7 +25,7 @@ Una vez descomprimida la carpeta `POITE - Scripts SH`, encontrarás:
 
 ```
 POITE-Scripts-SH/
-├── menu-principal.sh             # Menú de control principal
+├── menu.sh             # Menú de control principal
 ├── configurar-repos.sh           # Agrega y verifica repositorios oficiales
 ├── configurar-proxy.sh           # Establece el proxy institucional
 ├── sincronizar-hora.sh           # Configura zona horaria y sincroniza reloj
@@ -87,7 +87,7 @@ POITE-Scripts-SH/
 
 ## 🛡 Recomendaciones
 
-- **Ejecutar el menú como superusuario** (`sudo ./menu-principal.sh`) para garantizar permisos adecuados.
+- **Ejecutar el menú como superusuario** para garantizar permisos adecuados.
 - **Probar primero en una máquina virtual** si se aplicarán en múltiples equipos.
 - **Sincronizar regularmente** el sistema para mantener las configuraciones actualizadas.
 

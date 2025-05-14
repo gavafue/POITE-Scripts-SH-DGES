@@ -1,25 +1,33 @@
 #!/bin/bash
 
+# Colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[1;34m'
+YELLOW='\033[1;33m'
+MAGENTA='\033[1;35m'
+RESET='\033[0m'
+
 while true; do
   clear
-  echo "=== 👥 Menú: Usuarios y Cuentas ==="
-  echo "1) Crear usuario liceo"
-  echo "2) Cambiar usuario predeterminado"
-  echo "3) Activar acceso SSH"
-  echo "0) Volver al menú principal"
-  echo "==================================="
-  read -p "Seleccione una opción: " opcion
+  echo -e "${BLUE}=========== 👥 Menú: Usuarios y Cuentas ===========${RESET}"
+  echo -e "${MAGENTA}Seleccione una de las siguientes opciones:${RESET}"
+  echo -e "${YELLOW}=========================================${RESET}"
+  echo -e "${GREEN}1) ➕ Crear usuario liceo${RESET}"
+  echo -e "${GREEN}2) 🔁 Cambiar usuario predeterminado${RESET}"
+  echo -e "${GREEN}3) 🔐 Activar acceso SSH${RESET}"
+  echo -e "${RED}0) 🔙 Volver al menú principal${RESET}"
+  echo -e "${YELLOW}=========================================${RESET}"
+  echo -ne "${BLUE}Seleccione una opción: ${RESET}"
+  read opcion
 
   case $opcion in
     1) bash ../Usuarios/userliceo.sh ;;
     2) bash ../Usuarios/cambiar_usuario.sh ;;
     3) bash ../Usuarios/ssh.sh ;;
     0) break ;;
-    *) echo "Opción inválida"; read -p "Presione enter para continuar..." ;;
+    *) echo -e "${RED}Opción inválida. Presione Enter para continuar...${RESET}"; read ;;
   esac
 done
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script es un menú para la gestión de usuarios y cuentas en un sistema Linux.
-# Permite al usuario seleccionar diferentes opciones relacionadas con la creación de usuarios, cambio de usuario predeterminado y activación de acceso SSH.
-# Cada opción ejecuta un script diferente ubicado en la carpeta "Usuarios". 
+
+echo -e "${GREEN}Volviendo al menú principal...${RESET}"
