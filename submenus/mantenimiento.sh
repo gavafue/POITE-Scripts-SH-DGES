@@ -11,9 +11,9 @@ while true; do
   read -p "Seleccione una opción: " opcion
 
   case $opcion in
-    1) bash ../Mantenimiento/arreglar_reloj_ubuntu.sh ;;
-    2) bash ../Mantenimiento/reparar_dependencias.sh ;;
-    3) bash ../Mantenimiento/ssh.sh ;;
+    1) bash ./Mantenimiento/arreglar_reloj_ubuntu.sh ;;
+    2) bash ./Mantenimiento/reparar_dependencias.sh ;;
+    3) bash ./Mantenimiento/ssh.sh ;;
     0) break ;;
     *) echo "Opción inválida"; read -p "Presione enter para continuar..." ;;
   esac

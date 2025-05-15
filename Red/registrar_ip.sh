@@ -8,7 +8,7 @@ set -euo pipefail
 # ===============================================
 
 # Ruta al archivo donde se guardarán las IPs
-ARCHIVO_IP="/RegistrarIP/ips.txt"
+ARCHIVO_IP="./RegistrarIP/ips.txt"
 
 # Crear el directorio si no existe
 DIRECTORIO_IP=$(dirname "$ARCHIVO_IP")

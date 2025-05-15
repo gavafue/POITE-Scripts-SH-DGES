@@ -23,15 +23,15 @@ while true; do
     read opcion
     
     case $opcion in
-        1) bash ../Sistema/kernel.sh ;;
-        2) bash ../Sistema/cpu.sh ;;
-        3) bash ../Sistema/memoria.sh ;;
-        4) bash ../Sistema/discos.sh ;;
-        5) bash ../Sistema/so.sh ;;
-        6) bash ../Sistema/variables.sh ;;
-        7) bash ../Sistema/procesos.sh ;;
-        8) bash ../Sistema/hardware.sh ;;
-        9) bash ../Sistema/completo.sh ;;
+        1) bash ./Sistema/kernel.sh ;;
+        2) bash ./Sistema/cpu.sh ;;
+        3) bash ./Sistema/memoria.sh ;;
+        4) bash ./Sistema/discos.sh ;;
+        5) bash ./Sistema/so.sh ;;
+        6) bash ./Sistema/variables.sh ;;
+        7) bash ./Sistema/procesos.sh ;;
+        8) bash ./Sistema/hardware.sh ;;
+        9) bash ./Sistema/completo.sh ;;
         0) break ;;
         *) 
             echo "Opción inválida"
