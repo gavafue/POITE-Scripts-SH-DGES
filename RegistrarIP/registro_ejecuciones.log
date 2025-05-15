@@ -1,0 +1,55 @@
+2025-05-15 12:07:47 [0;31m❌ Archivo './RegistrarIP/remoto.sh' no encontrado.[0m
+2025-05-15 12:09:35 [1;33m⚠️  'sshpass' no está instalado. Ejecuta 'sudo apt install sshpass'.[0m
+jue 15 may 2025 12:09:35 -03
+----------------------------------------
+
+2025-05-15 12:09:35 [1;33m➡️  Procesando IP: 10.29.148.73[0m
+2025-05-15 12:09:35 [0;36m🔑 Intento 1/3 con clave SSH...[0m
+2025-05-15 12:09:35 [1;33m❌ No se pudo conectar con clave SSH en intento 1.[0m
+2025-05-15 12:09:35 [0;36m🔑 Intento 2/3 con clave SSH...[0m
+2025-05-15 12:09:35 [1;33m❌ No se pudo conectar con clave SSH en intento 2.[0m
+2025-05-15 12:09:35 [0;36m🔑 Intento 3/3 con clave SSH...[0m
+2025-05-15 12:09:36 [1;33m❌ No se pudo conectar con clave SSH en intento 3.[0m
+2025-05-15 12:09:36 [0;31m❌ Fallo total de conexión con 10.29.148.73.[0m
+2025-05-15 12:10:34 [1;33m⚠️  'sshpass' no está instalado. Ejecuta 'sudo apt install sshpass'.[0m
+jue 15 may 2025 12:10:34 -03
+----------------------------------------
+
+2025-05-15 12:10:34 [1;33m➡️  Procesando IP: 10.29.148.73[0m
+2025-05-15 12:10:34 [0;36m🔑 Intento 1/3 con clave SSH...[0m
+2025-05-15 12:10:34 [1;33m❌ No se pudo conectar con clave SSH en intento 1.[0m
+2025-05-15 12:10:34 [0;36m🔑 Intento 2/3 con clave SSH...[0m
+2025-05-15 12:10:34 [1;33m❌ No se pudo conectar con clave SSH en intento 2.[0m
+2025-05-15 12:10:34 [0;36m🔑 Intento 3/3 con clave SSH...[0m
+2025-05-15 12:10:34 [1;33m❌ No se pudo conectar con clave SSH en intento 3.[0m
+2025-05-15 12:10:34 [0;31m❌ Fallo total de conexión con 10.29.148.73.[0m
+jue 15 may 2025 12:11:03 -03
+----------------------------------------
+
+2025-05-15 12:11:03 [1;33m➡️  Procesando IP: 10.29.148.73[0m
+2025-05-15 12:11:03 [0;36m🔑 Intento 1/3 con clave SSH...[0m
+2025-05-15 12:11:03 [1;33m❌ No se pudo conectar con clave SSH en intento 1.[0m
+2025-05-15 12:11:03 [0;36m🔑 Intento 2/3 con clave SSH...[0m
+2025-05-15 12:11:03 [1;33m❌ No se pudo conectar con clave SSH en intento 2.[0m
+2025-05-15 12:11:03 [0;36m🔑 Intento 3/3 con clave SSH...[0m
+2025-05-15 12:11:03 [1;33m❌ No se pudo conectar con clave SSH en intento 3.[0m
+2025-05-15 12:11:03 [0;36m🔐 Intento 1/3 con contraseña...[0m
+2025-05-15 12:11:05 [1;33m❌ No se pudo conectar con contraseña en intento 1.[0m
+2025-05-15 12:11:05 [0;36m🔐 Intento 2/3 con contraseña...[0m
+2025-05-15 12:11:09 [1;33m❌ No se pudo conectar con contraseña en intento 2.[0m
+2025-05-15 12:11:09 [0;36m🔐 Intento 3/3 con contraseña...[0m
+2025-05-15 12:11:13 [1;33m❌ No se pudo conectar con contraseña en intento 3.[0m
+2025-05-15 12:11:13 [0;31m❌ Fallo total de conexión con 10.29.148.73.[0m
+jue 15 may 2025 12:11:33 -03
+----------------------------------------
+
+2025-05-15 12:11:33 [1;33m➡️  Procesando IP: 10.29.148.73[0m
+2025-05-15 12:11:33 [0;36m🔑 Intento 1/3 con clave SSH...[0m
+2025-05-15 12:11:33 [1;33m❌ No se pudo conectar con clave SSH en intento 1.[0m
+2025-05-15 12:11:33 [0;36m🔑 Intento 2/3 con clave SSH...[0m
+2025-05-15 12:11:33 [1;33m❌ No se pudo conectar con clave SSH en intento 2.[0m
+2025-05-15 12:11:33 [0;36m🔑 Intento 3/3 con clave SSH...[0m
+2025-05-15 12:11:33 [1;33m❌ No se pudo conectar con clave SSH en intento 3.[0m
+2025-05-15 12:11:33 [0;36m🔐 Intento 1/3 con contraseña...[0m
+2025-05-15 12:11:34 [0;32m✅ Conectado a 10.29.148.73 con contraseña.[0m
+2025-05-15 12:11:34 [0;32m✔️ Script ejecutado correctamente en 10.29.148.73 con contraseña.[0m

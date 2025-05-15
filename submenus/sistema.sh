@@ -1,23 +1,35 @@
 #!/bin/bash
 
+# Colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[1;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+MAGENTA='\033[1;35m'
+RESET='\033[0m'
+
 # Función para mostrar el menú
 mostrar_menu_sistema() {
     clear
-    echo "----- INFORMACIÓN DEL SISTEMA -----"
-    echo "1) Mostrar información del kernel"
-    echo "2) Mostrar información de la CPU"
-    echo "3) Mostrar información de memoria"
-    echo "4) Mostrar información de discos"
-    echo "5) Mostrar información del sistema operativo"
-    echo "6) Mostrar información de variables de entorno"
-    echo "7) Mostrar información de procesos en ejecución"
-    echo "8) Mostrar información de hardware (lshw)"
-    echo "9) Mostrar información completa del sistema"
-    echo "0) Volver al menú principal"
-    echo "----------------------------------"
-    echo -n "Seleccione una opción: "
+    echo -e "${BLUE}========== 💻 INFORMACIÓN DEL SISTEMA ==========${RESET}"
+    echo -e "${CYAN}Revise los detalles del sistema operativo y el hardware.${RESET}"
+    echo -e "${YELLOW}===============================================${RESET}"
+    echo -e "${GREEN}1) 🧩 Información del kernel${RESET}"
+    echo -e "${GREEN}2) 🧠 Información de la CPU${RESET}"
+    echo -e "${GREEN}3) 🪫 Información de la memoria RAM${RESET}"
+    echo -e "${GREEN}4) 💽 Información de los discos${RESET}"
+    echo -e "${GREEN}5) 🏷️  Información del sistema operativo${RESET}"
+    echo -e "${GREEN}6) 📦 Variables de entorno${RESET}"
+    echo -e "${GREEN}7) 🧮 Procesos en ejecución${RESET}"
+    echo -e "${GREEN}8) 🖧 Información de hardware (lshw)${RESET}"
+    echo -e "${GREEN}9) 📋 Información completa del sistema${RESET}"
+    echo -e "${RED}0) 🔙 Volver al menú principal${RESET}"
+    echo -e "${YELLOW}===============================================${RESET}"
+    echo -ne "${MAGENTA}Seleccione una opción: ${RESET}"
 }
 
+# Bucle principal
 while true; do
     mostrar_menu_sistema
     read opcion
@@ -32,10 +44,13 @@ while true; do
         7) bash ./Sistema/procesos.sh ;;
         8) bash ./Sistema/hardware.sh ;;
         9) bash ./Sistema/completo.sh ;;
-        0) break ;;
+        0) echo -e "${RED}Volviendo al menú principal...${RESET}"; break ;;
         *) 
-            echo "Opción inválida"
-            read -p "Presione Enter para continuar..."
+            echo -e "${RED}❌ Opción inválida. Presione Enter para continuar...${RESET}"
+            read
             ;;
     esac
 done
+
+# Mensaje de salida
+echo -e "${GREEN}✅ Ha salido del menú de información del sistema.${RESET}"

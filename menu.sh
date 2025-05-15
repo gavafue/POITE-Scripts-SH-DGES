@@ -22,6 +22,7 @@ while true; do
   echo -e "${GREEN}2) 👥 Usuarios y cuentas${RESET}"
   echo -e "${GREEN}3) 💻 Información del sistema${RESET}"
   echo -e "${GREEN}4) 🧹 Mantenimiento${RESET}"
+  echo -e "${GREEN}5) 🧩 Instalaciones frecuentes${RESET}"
   echo -e "${RED}0) Salir${RESET}"
   echo -e "${YELLOW}=====================================${RESET}"
   echo -ne "${BLUE}Seleccione una opción: ${RESET}"
@@ -32,6 +33,7 @@ while true; do
     2) bash ./submenus/usuarios.sh ;;
     3) bash ./submenus/sistema.sh ;;
     4) bash ./submenus/mantenimiento.sh ;;
+    5) bash ./submenus/instalaciones.sh ;;
     0) echo -e "${RED}Saliendo...${RESET}"; break ;;
     *) echo -e "${RED}Opción inválida. Presione Enter para continuar...${RESET}"; read ;;
   esac
