@@ -74,7 +74,7 @@ Cada opción abre un submenú o ejecuta tareas automatizadas.
    ```
 3. **Asigná permisos de ejecución (si es necesario):**
    ```bash
-   chmod +x menu.sh
+   chmod +x -R .
    ```
 4. **Ejecutá el script:**
    ```bash
