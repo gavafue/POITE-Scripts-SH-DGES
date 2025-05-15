@@ -1,108 +1,146 @@
-# 🧰 Sistema de Automatización y Mantenimiento para Laboratorios Informáticos
+# 🖥️ POITE-Scripts-SH-DGES
 
-**Autor:** Prof. Gabriel Vázquez  
-**Ubicación:** Uruguay  
-**Profesión:** Profesor de Informática  
+¡Hola! Soy **Gabriel Vázquez**, profesor de informática en Uruguay. Este proyecto nació de mi experiencia diaria en los laboratorios educativos de la **DGES** (Dirección General de Educación Secundaria), donde busco facilitar el trabajo cotidiano de docentes y POITES de aula.
 
 ---
 
-## 📌 Descripción General
+## 📌 Descripción
 
-Este proyecto fue creado con el objetivo de **automatizar tareas de mantenimiento, configuración y administración** en los laboratorios de informática, especialmente en entornos educativos. El sistema proporciona un conjunto de scripts Bash diseñados para facilitar al asistente de laboratorio (o al docente responsable) tareas críticas como:
+Desarrollé este **script Bash interactivo** para simplificar la administración de sistemas **GNU/Linux** en los laboratorios. Mi objetivo es que tanto docentes como POITES puedan gestionar tareas comunes de manera más simple y rápida, a través de un menú intuitivo que automatiza acciones como:
 
-- Configuración de repositorios.
-- Sincronización del reloj del sistema mediante NTP.
-- Reparación de errores comunes del sistema operativo.
-- Registro de direcciones IP.
-- Configuración de proxy institucional.
-- Interfaz de menú para ejecutar fácilmente cada función.
+- 🌐 **Diagnóstico de red**
+- 👥 **Gestión de cuentas de usuario**
+- 🧹 **Limpieza y mantenimiento**
+- 💻 **Revisión de información del sistema**
+- ⚙️ **Accesos rápidos a configuraciones útiles**
+
+> **Objetivo:** Optimizar el trabajo en los laboratorios, brindando una herramienta accesible desde la consola, con una interfaz visual clara (colores y emojis).
 
 ---
 
-## 📂 Estructura del Proyecto
+## 👤 Sobre mí
 
-Una vez descomprimida la carpeta `POITE - Scripts SH`, encontrarás:
+**Gabriel Vázquez**  
+*Profesor de informática – Uruguay*  
+[![Email](https://img.shields.io/badge/email-gabriel.vazquez%40docente.ceibal.edu.uy-blue?style=flat-square&logo=gmail)](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
+
+---
+
+## 🎯 Objetivo del proyecto
+
+Facilitar las tareas frecuentes de mantenimiento y administración en los laboratorios informáticos de la **DGES**, permitiendo al personal educativo:
+
+- 🚀 **Agilizar tareas rutinarias**
+- ✅ **Minimizar errores de ejecución**
+- ⏱️ **Mejorar el tiempo de respuesta ante problemas comunes**
+- 🛠️ **Promover la autonomía técnica en la gestión de equipos**
+
+---
+
+## 🗃️ Contenido del proyecto
+
+| Archivo/Carpeta | Descripción                                      |
+|:---------------:|:-------------------------------------------------|
+| [`menu.sh`](menu.sh) | Script principal con menú interactivo            |
+| `.git/`         | Estructura del repositorio Git (control de versiones) |
+
+---
+
+## 📂 Estructura del menú
+
+Al ejecutar <kbd>menu.sh</kbd>, verás un menú principal con las siguientes opciones:
 
 ```
-POITE-Scripts-SH/
-├── menu.sh             # Menú de control principal
-├── configurar-repos.sh           # Agrega y verifica repositorios oficiales
-├── configurar-proxy.sh           # Establece el proxy institucional
-├── sincronizar-hora.sh           # Configura zona horaria y sincroniza reloj
-├── reparar-sistema.sh            # Realiza mantenimiento completo del sistema
-├── registrar-ip.sh               # Guarda la IP del equipo en un archivo
-├── README.md                     # Este archivo de ayuda
-└── RegistrarIP/ips.txt           # Archivo donde se registran IPs
+1. 🌐 Red y conectividad
+2. 👥 Usuarios y cuentas
+3. 💻 Información del sistema
+4. 🧹 Mantenimiento
+5. 🧩 Instalaciones y herramientas
+6. 🔧 Herramientas técnicas
+7. 📦 Scripts adicionales
+8. 🔚 Salir
 ```
+
+Cada opción abre un submenú o ejecuta tareas automatizadas.
+
+---
+
+## ▶️ Cómo ejecutar
+
+1. **Abrí una terminal.**
+2. **Navegá al directorio del script:**
+   ```bash
+   cd POITE-Scripts-SH-DGES
+   ```
+3. **Asigná permisos de ejecución (si es necesario):**
+   ```bash
+   chmod +x menu.sh
+   ```
+4. **Ejecutá el script:**
+   ```bash
+   ./menu.sh
+   ```
 
 ---
 
 ## ⚙️ Requisitos
 
-- Ubuntu 20.04 o derivado compatible (Xubuntu, Lubuntu, etc.)
-- Acceso de superusuario (`sudo`) para ejecutar configuraciones del sistema.
-- Conexión a internet (para actualizaciones, NTP, repositorios).
-- Puerto UDP 123 abierto (para sincronización NTP).
+- Sistema operativo: **GNU/Linux** (preferentemente Debian/Ubuntu)
+- **Bash shell**
+- Permisos de **superusuario** para algunas tareas (ej. creación de usuarios, instalación de software)
 
 ---
 
-## 🚀 Instalación y Uso
+## 🧪 Ejemplos de funciones incluidas
 
-1. **Descargar y descomprimir** la carpeta `POITE - Scripts SH`.
+Incluye funciones como:
 
-2. Asignar permisos de ejecución recursivos:
-
-   ```bash
-   chmod -R +x "POITE - Scripts SH"
-   ```
-
-3. Ingresar al directorio:
-
-   ```bash
-   cd "POITE - Scripts SH"
-   ```
-
-4. Ejecutar el menú principal:
-
-   ```bash
-   ./menu.sh
-   ```
-
-5. Desde el menú podrás acceder a cada módulo de mantenimiento de forma interactiva y clara.
+- Configurar el proxy de DGES en la terminal
+- Comunicación de red entre equipos del laboratorio
+- Reparar repositorios y dependencias de paquetes
+- Creación de usuarios masivos
+- Operaciones en red con SSH por lotes.
 
 ---
 
-## 📋 Funcionalidades del Menú
+## 🔐 Seguridad
 
-| Opción                      | Función                                                                 |
-|----------------------------|-------------------------------------------------------------------------|
-| 🛠 Reparar sistema          | Realiza limpieza, actualización, reinstalación y reparación del sistema |
-| 🌐 Configurar proxy         | Establece un proxy HTTP/HTTPS institucional                             |
-| 🕒 Sincronizar hora         | Configura servidores NTP y zona horaria Uruguay                         |
-| 📋 Registrar IP             | Guarda la IP del host en un archivo centralizado                        |
-| 📦 Configurar repositorios | Añade y verifica repos oficiales de Ubuntu Focal                        |
-| 🔁 Salir                   | Finaliza el script                                                      |
+Este script **no recoge información personal** ni se conecta a servidores externos sin interacción del usuario.  
+> **Nota:** Muchas operaciones requieren permisos de root.  
+> **Recomendación:** Revisá el código antes de usarlo en entornos productivos.
 
 ---
 
-## 🛡 Recomendaciones
+## 🧱 Posibles mejoras futuras
 
-- **Ejecutar el menú como superusuario** para garantizar permisos adecuados.
-- **Probar primero en una máquina virtual** si se aplicarán en múltiples equipos.
-- **Sincronizar regularmente** el sistema para mantener las configuraciones actualizadas.
+Estoy pensando en agregar:
+
+- Inclusión de logs de ejecución
+- Exportación de reportes del sistema
+- Modularización en scripts externos por categoría
+- Detección automática del entorno (distribución, red, etc.)
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye de forma libre para la colaboración de docentes y POITES que deseen contribuir.
+
+---
+
+## 🤝 Contribuciones
+
+¡Las contribuciones son bienvenidas!  
+Si querés sumar mejoras:
+
+1. Hacé un **fork** del repositorio.
+2. Creá una **rama**.
+3. Subí los cambios con una descripción clara.
+4. Abrí un **Pull Request**.
 
 ---
 
 ## 📬 Contacto
 
-**Gabriel Vázquez**  
-Profesor de Informática - Uruguay  
-📧 *[gabriel.vazquez@docente.ceibal.edu.uy]*
-
----
-
-## 🧠 Licencia
-
-Este proyecto puede ser utilizado, adaptado y mejorado por otros docentes o instituciones con fines educativos. Agradezco cualquier colaboración o sugerencia.
-
----
+¿Sugerencias, dudas o querés colaborar?  
+[![Email](https://img.shields.io/badge/email-gabriel.vazquez%40docente.ceibal.edu.uy-blue?style=flat-square&logo=gmail)](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
