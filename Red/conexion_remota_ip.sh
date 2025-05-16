@@ -69,3 +69,10 @@ done
 
 echo "✅ Todos los procesos finalizados."
 read -p "Presione Enter para salir..."
+
+# Fin del script
+# Este script permite la conexión remota a equipos de red utilizando SSH.
+# Se requiere un archivo de IPs y un script remoto para ejecutar en los hosts.
+# Asegúrese de tener los permisos necesarios para realizar las acciones solicitadas.
+# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.
+# Asegúrese de tener los permisos necesarios para realizar las acciones solicitadas.

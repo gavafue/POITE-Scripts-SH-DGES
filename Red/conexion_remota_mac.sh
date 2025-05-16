@@ -152,3 +152,9 @@ done
 
 echo "✅ Proceso finalizado."
 read -p "Presione Enter para salir..."
+
+# Fin del script
+# Este script permite la conexión remota a equipos de red utilizando SSH.
+# Se encarga de instalar las herramientas necesarias, leer un archivo de MACs,
+# escanear la red y ejecutar un script remoto en los equipos encontrados.
+# Asegúrese de tener los permisos necesarios para realizar las acciones solicitadas.

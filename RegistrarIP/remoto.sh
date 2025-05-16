@@ -15,3 +15,9 @@ echo "🛠️ Ejecutando otros pasos..."
 # ...
 
 echo "🏁 Fin del script remoto."
+
+# Fin del script
+# Este script remoto se ejecuta en los equipos de red.
+# Se encarga de instalar geogebra y realizar otras tareas necesarias.
+# Asegúrese de que el script remoto tenga permisos de ejecución.
+# Se recomienda ejecutarlo con permisos de superusuario para un funcionamiento óptimo.
