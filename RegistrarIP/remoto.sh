@@ -1,3 +1,17 @@
-# Este script es el que se enviará a las PCs tanto en el archivo 'conexion_remota_ip' como en 'conexion_remota_mac'.
-# Su propósito es ser ejecutado remotamente para realizar las acciones necesarias en los equipos destino.
-apt install stellarium -y
+#!/bin/bash
+
+echo "🚀 Iniciando en $(hostname)..."
+
+# Si se pasó la contraseña y es necesario sudo
+if [[ -n "$PASSWORD" ]]; then
+  echo "🔧 Ejecutando tareas con sudo..."
+  echo "$PASSWORD" | sudo -S apt update
+  echo "$PASSWORD" | sudo -S apt install -y geogebra
+fi
+
+# Tareas independientes
+# Más tareas...
+echo "🛠️ Ejecutando otros pasos..."
+# ...
+
+echo "🏁 Fin del script remoto."

@@ -1,102 +1,154 @@
 #!/bin/bash
 
-set -euo pipefail
+#======================= CONFIGURACIÓN =======================#
+REMOTE_SCRIPT="../RegistrarIP/remoto.sh"
+MAC_FILE="../RegistrarIP/macs.txt"
+#=============================================================#
 
-ARCHIVO_MACS="./RegistrarIP/macs.txt"
-SCRIPT_LOCAL="./RegistrarIP/remoto.sh"
-USUARIO="gabriel"
-PASSWORD="1234"
-RUTA_REMOTA="/tmp/script_remoto.sh"
-INTENTOS=3
-TIMEOUT=5
-
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-RESET='\033[0m'
-
-pausa() {
-  read -rp "Presione Enter para volver atrás..."
-}
-
+#------------ Función para instalar dependencias ------------#
 instalar_si_falta() {
-  local herramienta=$1
-  if ! command -v "$herramienta" &>/dev/null; then
-    echo -e "${YELLOW}🛠️  Instalando '$herramienta'...${RESET}"
-    sudo apt-get update -qq
-    sudo apt-get install -y "$herramienta"
-    echo -e "${GREEN}✅ '$herramienta' instalado.${RESET}"
-  else
-    echo -e "${CYAN}✔️ '$herramienta' ya está instalado.${RESET}"
-  fi
+    comando=$1
+    paquete=$2
+    if ! command -v "$comando" &>/dev/null; then
+        echo "🔧 Instalando $paquete..."
+        sudo apt update && sudo apt install -y "$paquete"
+        if ! command -v "$comando" &>/dev/null; then
+            echo "❌ No se pudo instalar $paquete. Abortando."
+            exit 1
+        fi
+    fi
 }
 
-for herramienta in arp-scan sshpass ssh scp; do
-  instalar_si_falta "$herramienta"
+#------------------- Instalar herramientas ------------------#
+instalar_si_falta "ipcalc" "ipcalc"
+instalar_si_falta "nmap" "nmap"
+instalar_si_falta "arp-scan" "arp-scan"
+instalar_si_falta "arp" "net-tools"
+instalar_si_falta "ssh" "openssh-client"
+instalar_si_falta "sshpass" "sshpass"
+
+#------------------- Leer MACs desde archivo ----------------#
+if [[ ! -f "$MAC_FILE" ]]; then
+    echo "❌ Archivo de MACs no encontrado: $MAC_FILE"
+    exit 1
+fi
+
+mapfile -t MACS < <(grep -iE '([0-9a-f]{2}:){5}[0-9a-f]{2}' "$MAC_FILE")
+
+if [[ ${#MACS[@]} -eq 0 ]]; then
+    echo "❌ El archivo $MAC_FILE no contiene MACs válidas."
+    exit 1
+fi
+
+#------------------- Obtener interfaz activa ----------------#
+interfaz=$(ip route | awk '/default/ {print $5}' | head -n1)
+
+if [[ -z "$interfaz" || "$interfaz" == "lo" ]]; then
+    echo "❌ No se detectó una interfaz activa válida."
+    exit 1
+fi
+
+echo "🌐 Usando interfaz de red: $interfaz"
+
+#------------------- Obtener MAC e IP local ------------------#
+mac_local=$(cat /sys/class/net/"$interfaz"/address | tr '[:upper:]' '[:lower:]')
+ip_local=$(ip -4 addr show "$interfaz" | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+
+#------------------- Obtener subred -------------------------#
+ip_cidr=$(ip -4 addr show "$interfaz" | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+')
+subred=$(ipcalc -n "$ip_cidr" | grep -oP 'Network:\s+\K\S+')
+
+if [[ -z "$subred" ]]; then
+    echo "❌ No se pudo determinar la subred."
+    exit 1
+fi
+
+echo "📡 Subred detectada: $subred"
+
+#------------------- Escaneo de red -------------------------#
+echo "🔍 Escaneando red con nmap..."
+sudo nmap -sn "$subred" >/dev/null
+
+echo "🔍 Obteniendo tabla ARP..."
+arp_output=$(arp -an)
+
+echo "🔍 Escaneando red con arp-scan..."
+arp_scan_output=$(sudo arp-scan --interface="$interfaz" "$subred")
+
+#------------------- Credenciales SSH ------------------------#
+read -p "👤 Usuario remoto: " usuario
+read -s -p "🔐 Contraseña SSH (dejar vacío si se usa clave): " clave
+echo
+
+#------------------- Buscar y ejecutar -----------------------#
+for mac in "${MACS[@]}"; do
+    mac_normalizada=$(echo "$mac" | tr '[:upper:]' '[:lower:]')
+    echo "🔎 Procesando MAC: $mac_normalizada"
+    ip=""
+
+    # Si es la MAC local, usar IP local
+    if [[ "$mac_normalizada" == "$mac_local" ]]; then
+        ip="$ip_local"
+        echo "🏠 MAC corresponde al equipo local. IP: $ip"
+    else
+        # Buscar IP en las distintas fuentes
+        ip=$(echo "$arp_output" | awk -v mac="$mac_normalizada" 'tolower($4)==mac {gsub(/[()]/, "", $2); print $2}')
+        [[ -z "$ip" ]] && ip=$(ip neigh | awk -v mac="$mac_normalizada" 'tolower($5)==mac {print $1}')
+        [[ -z "$ip" ]] && ip=$(echo "$arp_scan_output" | awk -v mac="$mac_normalizada" 'tolower($2)==mac {print $1}')
+    fi
+
+    if [[ -z "$ip" || ! "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "❌ IP inválida o no encontrada para MAC $mac"
+        continue
+    fi
+
+    echo "➡️ IP utilizada: $ip"
+    exito=false
+
+    # Intento con clave pública
+    for intento in {1..3}; do
+        echo "🔑 Intento $intento/3 con clave SSH..."
+        if ssh -o BatchMode=yes -o ConnectTimeout=5 "$usuario@$ip" 'echo "Conexión con clave OK."' &>/dev/null; then
+            echo "✅ Conectado con clave SSH."
+            exito=true
+            break
+        else
+            echo "❌ Falló intento con clave SSH."
+        fi
+    done
+
+    # Si no funcionó la clave, intento con contraseña
+    if ! $exito && [[ -n "$clave" ]]; then
+        for intento in {1..3}; do
+            echo "🔐 Intento $intento/3 con contraseña..."
+            sshpass -p "$clave" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 "$usuario@$ip" 'echo "Conexión con contraseña OK."' &>/dev/null
+            if [[ $? -eq 0 ]]; then
+                echo "✅ Conectado con contraseña."
+                exito=true
+                break
+            else
+                echo "❌ Falló intento con contraseña."
+            fi
+        done
+    fi
+
+    if $exito; then
+        echo "📤 Copiando script remoto a $ip..."
+        sshpass -p "$clave" scp -o StrictHostKeyChecking=no "$REMOTE_SCRIPT" "$usuario@$ip:/tmp/script_remoto.sh" &>/dev/null
+
+        echo "🚀 Ejecutando script remoto en $ip..."
+        sshpass -p "$clave" ssh -tt -o StrictHostKeyChecking=no "$usuario@$ip" "export PASSWORD='$clave'; bash /tmp/script_remoto.sh"
+
+        echo "🧹 Limpiando script remoto..."
+        sshpass -p "$clave" ssh -o StrictHostKeyChecking=no "$usuario@$ip" "rm /tmp/script_remoto.sh"
+
+        echo "🏁 Script finalizado en $ip."
+    else
+        echo "⚠️ No se pudo conectar a $ip. Se omite."
+    fi
+
+    echo "---------------------------------------------"
 done
 
-buscar_ip_por_mac() {
-  local mac="$1"
-  arp-scan -l | grep -i "$mac" | awk '{print $1}'
-}
-
-conectar_y_enviar() {
-  local ip="$1"
-
-  echo -e "${YELLOW}➡️  Procesando IP: $ip (asociada a MAC objetivo)${RESET}"
-
-  for intento in $(seq 1 $INTENTOS); do
-    echo -e "${CYAN}🔐 Intento $intento/$INTENTOS con contraseña SSH...${RESET}"
-    if sshpass -p "$PASSWORD" ssh -o ConnectTimeout=$TIMEOUT -o StrictHostKeyChecking=no "$USUARIO@$ip" "echo ok" &>/dev/null; then
-      echo -e "${GREEN}✅ Conectado a $ip.${RESET}"
-      if sshpass -p "$PASSWORD" scp -o ConnectTimeout=$TIMEOUT -o StrictHostKeyChecking=no "$SCRIPT_LOCAL" "$USUARIO@$ip:$RUTA_REMOTA" &>/dev/null; then
-        if sshpass -p "$PASSWORD" ssh -o ConnectTimeout=$TIMEOUT -o StrictHostKeyChecking=no "$USUARIO@$ip" "bash $RUTA_REMOTA"; then
-          echo -e "${GREEN}✔️ Script ejecutado en $ip correctamente.${RESET}"
-          return 0
-        else
-          echo -e "${RED}❌ Fallo al ejecutar script en $ip.${RESET}"
-          pausa
-        fi
-      else
-        echo -e "${RED}❌ Fallo al copiar script a $ip.${RESET}"
-        pausa
-      fi
-    else
-      echo -e "${YELLOW}❌ No se pudo conectar a $ip (intento $intento).${RESET}"
-      pausa
-    fi
-  done
-
-  echo -e "${RED}❌ No se pudo establecer conexión con $ip tras $INTENTOS intentos.${RESET}"
-  pausa
-}
-
-echo -e "${CYAN}📡 Escaneando red y ejecutando script en MACs listadas en '$ARCHIVO_MACS'...${RESET}"
-
-while IFS= read -r mac || [[ -n "$mac" ]]; do
-  mac=$(echo "$mac" | tr '[:upper:]' '[:lower:]' | xargs)
-  [[ -z "$mac" ]] && continue
-
-  echo -e "${CYAN}🔍 Buscando IP para MAC: $mac${RESET}"
-  ip=$(buscar_ip_por_mac "$mac")
-
-  if [[ -n "$ip" ]]; then
-    echo -e "${GREEN}🔗 MAC $mac asociada a IP $ip${RESET}"
-    conectar_y_enviar "$ip"
-  else
-    echo -e "${RED}❌ No se encontró IP para MAC $mac${RESET}"
-    pausa
-  fi
-
-  echo -e "${CYAN}----------------------------------------${RESET}"
-done < "$ARCHIVO_MACS"
-
-echo -e "${GREEN}🏁 Proceso finalizado para todas las MAC.${RESET}"
-pausa
-#Fin del script
-# Este script busca direcciones IP asociadas a direcciones MAC en un archivo.
-# Si encuentra una IP, intenta conectarse a ella usando SSH y ejecutar un script remoto.
-# Requiere herramientas como arp-scan, sshpass, ssh y scp.
-# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.
-# Asegúrate de que el archivo de MACs y el script remoto existan y sean accesibles.
+echo "✅ Proceso finalizado."
+read -p "Presione Enter para salir..."
