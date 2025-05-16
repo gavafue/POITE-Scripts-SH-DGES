@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #======================= CONFIGURACIÓN =======================#
-REMOTE_SCRIPT="../RegistrarIP/remoto.sh"
-MAC_FILE="../RegistrarIP/macs.txt"
+REMOTE_SCRIPT="./RegistrarIP/remoto.sh"
+MAC_FILE="./RegistrarIP/macs.txt"
 #=============================================================#
 
 #------------ Función para instalar dependencias ------------#
