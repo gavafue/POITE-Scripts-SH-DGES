@@ -33,3 +33,10 @@ echo -e "${YELLOW}📡 Estado de las interfaces de red:${RESET}"
 ip a
 
 read -p "Presione Enter para volver al menú..."
+
+# Fin del script
+# Este script reinicia los servicios de red en un sistema Linux.
+# Se asegura de que el script se ejecute con privilegios de superusuario.
+# Intenta reiniciar NetworkManager y el servicio de networking.
+# Finalmente, muestra el estado de las interfaces de red.
+# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.

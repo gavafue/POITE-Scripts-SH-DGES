@@ -47,3 +47,10 @@ fi
 
 # Pausa final
 read -p "Presione Enter para volver al menú..."
+
+# Fin del script
+# Este script limpia el archivo de IPs registrado en el directorio ./RegistrarIP.
+# Primero verifica si el directorio y el archivo existen.
+# Luego, valida si el archivo es escribible.
+# Si todo está en orden, vacía el archivo y confirma la operación.
+# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.
