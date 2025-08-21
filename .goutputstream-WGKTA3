@@ -1,8 +1,0 @@
-[sudo] contraseña para ceibal:       
-root@ceibal-SF20PA2:/media/ceibal/Ventoy/POITE-Scripts-SH-DGES# chmod 777 -R .
-root@ceibal-SF20PA2:/media/ceibal/Ventoy/POITE-Scripts-SH-DGES# ./menu.sh 
-bash: ./menu.sh: /bin/bash^M: intérprete erróneo: No existe el archivo o el directorio
-root@ceibal-SF20PA2:/media/ceibal/Ventoy/POITE-Scripts-SH-DGES# ^C
-root@ceibal-SF20PA2:/media/ceibal/Ventoy/POITE-Scripts-SH-DGES# ^C
-
-find . -type f -name "*.sh" -exec bash -c 'for f; do tr -d "\r" < "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done' bash {} +
