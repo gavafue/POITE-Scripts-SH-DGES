@@ -19,6 +19,7 @@ while true; do
   echo -e "${GREEN}3) 🌐 Instalar Navegador Chrome${RESET}"
   echo -e "${GREEN}4) 📚 Instalar Suite Educativa${RESET}"
   echo -e "${CYAN}     - Esta opción instalará: libreoffice, pdfarranger, gnome-dictionary, firefox, scratch, thonny, geany, kate, gcompris, kalzium, kstars, marble, kiwix-desktop, gimp, inkscape, krita, tuxpaint, vlc, audacity, obs-studio, shotcut, kdenlive, bleachbit, timeshift, synaptic, gparted, clamav, clamtk, gufw, keepassxc, onboard, orca, magnus, librecad, stellarium, celestia, tuxmath, tuxtype.${RESET}"
+  echo -e "${GREEN}5) Instalar Wine${RESET}"
   echo -e "${RED}0) 🔙 Volver al menú principal${RESET}"
   echo -e "${YELLOW}==============================================${RESET}"
   echo -ne "${MAGENTA}Seleccione una opción: ${RESET}"
@@ -29,6 +30,7 @@ while true; do
     2) bash ./InstalacionesFrecuentes/instalar_visual_studio_code.sh ;;
     3) bash ./InstalacionesFrecuentes/instalar_chrome.sh ;;
     4) bash ./InstalacionesFrecuentes/suite_educativa.sh ;;
+    5) bash ./InstalacionesFrecuentes/instalar_wine.sh ;;
     0) 
       echo -e "${RED}↩️  Volviendo al menú principal...${RESET}" 
       sleep 1
