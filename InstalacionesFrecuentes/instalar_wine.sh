@@ -101,3 +101,11 @@ USER_HOME=$(eval echo "~$SUDO_USER")
 WINEPREFIX="$USER_HOME/.wine"
 echo "📂 Configurando wineprefix en $WINEPREFIX..."
 sudo -u "$SUDO_USER" WINEPREFIX="$WINEPREFIX" wineboot --init || true
+echo -e "${YELLOW}Presione ENTER para volver atrás...${RESET}"
+read
+# Fin del script
+# Este script instala WineHQ en un sistema Linux basado en Debian/Ubuntu.
+# Se asegura de que el script se ejecute con privilegios de superusuario.
+# Primero instala las dependencias necesarias (wget y gpg).
+# Luego descarga la clave GPG de WineHQ y agrega el repositorio de WineHQ.
+# Finalmente, instala WineHQ y verifica si la instalación fue exitosa.
