@@ -1,54 +1,70 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Gestor de Proxy Institucional DGES para APT
+# ==============================================================================
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-# ============================================
-# Configurar proxy HTTP/HTTPS para APT
-# Autor: Optimizado para uso institucional
-# ============================================
+APT_PROXY_FILE="/etc/apt/apt.conf.d/99proxy-dges.conf"
+PROXY_PREDETERMINADO="10.4.142.24:8080"
 
-PROXY_IP="10.4.142.24:8080"
-APT_CONF_FILE="/etc/apt/apt.conf.d/proxy.conf"
-BACKUP_FILE="/etc/apt/apt.conf.d/proxy.conf.bak"
+imprimir_encabezado "🛡️ GESTOR DE PROXY INSTITUCIONAL DGES" "Configuración para descargas y actualizaciones APT en laboratorios"
 
-proxy_http="Acquire::http::proxy \\\"http://$PROXY_IP\\\";"
-proxy_https="Acquire::https::proxy \\\"http://$PROXY_IP\\\";"
-
-# Crear respaldo si no existe
-if [ -f "$APT_CONF_FILE" ] && [ ! -f "$BACKUP_FILE" ]; then
-  echo "🔒 Creando respaldo de proxy.conf en $BACKUP_FILE"
-  sudo cp "$APT_CONF_FILE" "$BACKUP_FILE"
-fi
-
-# Crear el archivo si no existe
-if [ ! -f "$APT_CONF_FILE" ]; then
-  echo "📝 Creando archivo $APT_CONF_FILE"
-  sudo touch "$APT_CONF_FILE"
-fi
-
-# Añadir proxy HTTP si no está presente
-if ! grep -Fxq "Acquire::http::proxy \"http://$PROXY_IP\";" "$APT_CONF_FILE"; then
-  echo "➕ Añadiendo proxy HTTP"
-  echo "Acquire::http::proxy \"http://$PROXY_IP\";" | sudo tee -a "$APT_CONF_FILE" > /dev/null
+echo -e "${BOLD}Estado actual del proxy en APT:${RESET}"
+if [[ -f "$APT_PROXY_FILE" ]] && grep -q "Acquire::http::proxy" "$APT_PROXY_FILE" 2>/dev/null; then
+    imprimir_exito "Proxy ACTIVO en $APT_PROXY_FILE:"
+    cat "$APT_PROXY_FILE"
 else
-  echo "✔️ Proxy HTTP ya está configurado"
+    imprimir_info "No hay proxy DGES configurado actualmente en APT (conexión directa)."
 fi
 
-# Añadir proxy HTTPS si no está presente
-if ! grep -Fxq "Acquire::https::proxy \"http://$PROXY_IP\";" "$APT_CONF_FILE"; then
-  echo "➕ Añadiendo proxy HTTPS"
-  echo "Acquire::https::proxy \"http://$PROXY_IP\";" | sudo tee -a "$APT_CONF_FILE" > /dev/null
-else
-  echo "✔️ Proxy HTTPS ya está configurado"
-fi
+echo
+echo -e "  ${GREEN}1)${RESET} Activar / Cambiar Proxy DGES"
+echo -e "  ${YELLOW}2)${RESET} Desactivar y eliminar Proxy DGES (Restaurar conexión directa)"
+echo -e "  ${RED}0)${RESET} Cancelar y volver"
+echo
+echo -ne "${BOLD}Seleccione una acción [0-2]: ${RESET}"
+read -r accion
 
-echo "✅ Configuración completada en $APT_CONF_FILE"
-echo "Volviendo al menú principal..."
-read -p "Presione enter para continuar..."
-# Fin del script
-# Este script configura un proxy HTTP/HTTPS para APT en un sistema Linux.
-# Primero, verifica si el archivo de configuración del proxy ya existe y crea una copia de seguridad si no existe.
-# Luego, verifica si el archivo de configuración de APT existe y lo crea si no existe.
-# A continuación, añade la configuración del proxy HTTP y HTTPS al archivo de configuración de APT si no están presentes.
-# Finalmente, muestra un mensaje de confirmación y espera a que el usuario presione enter para continuar y volver al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+case "$accion" in
+    1)
+        if ! asegurar_root; then
+            exit 1
+        fi
+        echo
+        echo -ne "${CYAN}Ingrese IP y puerto del proxy [Enter para usar $PROXY_PREDETERMINADO]: ${RESET}"
+        read -r entrada_proxy
+        PROXY_ELEGIDO="${entrada_proxy:-$PROXY_PREDETERMINADO}"
+
+        echo -e "${CYAN}Configurando proxy con '$PROXY_ELEGIDO'...${RESET}"
+        sudo tee "$APT_PROXY_FILE" > /dev/null <<EOF
+Acquire::http::proxy "http://${PROXY_ELEGIDO}/";
+Acquire::https::proxy "http://${PROXY_ELEGIDO}/";
+EOF
+        if [[ $? -eq 0 ]]; then
+            imprimir_exito "Proxy DGES ($PROXY_ELEGIDO) configurado exitosamente para APT."
+        else
+            imprimir_error "Ocurrió un error al escribir en $APT_PROXY_FILE."
+        fi
+        ;;
+    2)
+        if ! asegurar_root; then
+            exit 1
+        fi
+        echo -e "${YELLOW}Eliminando configuraciones de proxy...${RESET}"
+        sudo rm -f "$APT_PROXY_FILE"
+        sudo rm -f "/etc/apt/apt.conf.d/proxy.conf" 2>/dev/null || true
+        imprimir_exito "Proxy eliminado. APT ahora se conectará directamente a Internet."
+        ;;
+    0)
+        imprimir_info "Operación cancelada."
+        ;;
+    *)
+        imprimir_error "Opción inválida."
+        ;;
+esac
+
+pausar

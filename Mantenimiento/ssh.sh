@@ -1,31 +1,34 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Instalación y habilitación del servicio OpenSSH Server
+# ==============================================================================
 
-echo "Activando y configurando el servicio SSH..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-sudo apt update
-sudo apt install -y openssh-server
+imprimir_encabezado "🔐 SERVIDOR SSH (OPENSSH SERVER)" "Habilita acceso remoto seguro para administración del aula"
 
-sudo systemctl enable ssh
-sudo systemctl start ssh
-
-estado=$(sudo systemctl is-active ssh)
-
-if [[ "$estado" == "active" ]]; then
-  ip=$(hostname -I | awk '{print $1}')
-  echo "✅ SSH activado. Puede conectarse con:"
-  echo "    ssh usuario@$ip"
-else
-  echo "❌ Hubo un error al iniciar el servicio SSH."
+if ! asegurar_root; then
+    exit 1
 fi
 
-read -p "Presione enter para continuar..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script activa y configura el servicio SSH en un sistema Linux.
-# Primero, actualiza la lista de paquetes e instala el servidor SSH.
-# Luego, habilita el servicio SSH para que se inicie automáticamente al arrancar el sistema y lo inicia inmediatamente.
-# Después, verifica el estado del servicio SSH y muestra la dirección IP del sistema para que el usuario pueda conectarse a través de SSH.
-# Si el servicio se activa correctamente, se muestra un mensaje de éxito con la dirección IP.
-# Si hay un error al iniciar el servicio, se muestra un mensaje de error.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+echo -e "${CYAN}Instalando y activando servicio OpenSSH...${RESET}"
+sudo apt update && sudo apt install -y openssh-server
+
+sudo systemctl enable ssh
+sudo systemctl restart ssh
+
+if systemctl is-active --quiet ssh; then
+    IP_ACTUAL=$(obtener_ip_local)
+    USUARIO_ACTUAL=$(whoami)
+    imprimir_exito "Servidor SSH activo y escuchando en el puerto 22."
+    echo
+    echo -e "${BOLD}Para conectarse desde otra máquina del aula ejecute:${RESET}"
+    echo -e "  ${GREEN}ssh ${USUARIO_ACTUAL}@${IP_ACTUAL}${RESET}"
+else
+    imprimir_error "No se pudo iniciar el servicio SSH."
+fi
+
+pausar

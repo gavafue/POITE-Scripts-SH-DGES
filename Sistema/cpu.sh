@@ -1,12 +1,33 @@
 #!/bin/bash
-clear
-echo ">>> INFORMACIÓN DEL KERNEL <<<"
-uname -a
-echo ""
-read -p "Presione Enter para volver al menú..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script muestra información del kernel del sistema operativo Linux utilizando el comando `uname -a`.
-# La información incluye el nombre del kernel, la versión, la arquitectura y otros detalles relevantes.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Información detallada de CPU / Procesador
+# ==============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
+
+imprimir_encabezado "🧠 INFORMACIÓN DEL PROCESADOR (CPU)" "Arquitectura, núcleos, modelo y frecuencia de procesamiento"
+
+echo -e "${BOLD}Resumen de la CPU:${RESET}"
+echo "----------------------------------------------------------------------"
+MODELO=$(lscpu 2>/dev/null | grep -i "Model name" | cut -d: -f2 | xargs || grep -m1 "model name" /proc/cpuinfo | cut -d: -f2 | xargs)
+ARQ=$(lscpu 2>/dev/null | grep -i "Architecture" | cut -d: -f2 | xargs || uname -m)
+CORES=$(lscpu 2>/dev/null | grep -i "^CPU(s):" | cut -d: -f2 | xargs || nproc)
+HILOS_POR_NUCLEO=$(lscpu 2>/dev/null | grep -i "Thread(s) per core" | cut -d: -f2 | xargs || echo "1")
+FREQ_MAX=$(lscpu 2>/dev/null | grep -i "CPU max MHz" | cut -d: -f2 | xargs || echo "N/A")
+VIRT=$(lscpu 2>/dev/null | grep -i "Virtualization" | cut -d: -f2 | xargs || echo "No detectada")
+
+echo -e "• Modelo:          ${CYAN}${MODELO:-Desconocido}${RESET}"
+echo -e "• Arquitectura:    ${GREEN}$ARQ${RESET}"
+echo -e "• Núcleos/Hilos:   ${YELLOW}$CORES totales ($HILOS_POR_NUCLEO por núcleo)${RESET}"
+echo -e "• Frecuencia máx:  $FREQ_MAX MHz"
+echo -e "• Virtualización:  $VIRT"
+echo "----------------------------------------------------------------------"
+
+echo
+echo -e "${BOLD}Detalle completo (lscpu):${RESET}"
+lscpu 2>/dev/null | head -n 25
+
+pausar

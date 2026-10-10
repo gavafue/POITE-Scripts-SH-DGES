@@ -1,18 +1,32 @@
 #!/bin/bash
-clear
-echo ">>> INFORMACIÓN DEL SISTEMA OPERATIVO <<<"
-if [ -f /etc/os-release ]; then
-    cat /etc/os-release
-elif [ -f /etc/lsb-release ]; then
-    cat /etc/lsb-release
-else
-    echo "No se pudo determinar la distribución"
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Información del Sistema Operativo y Distribución
+# ==============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
+
+imprimir_encabezado "🏷️ SISTEMA OPERATIVO Y DISTRIBUCIÓN" "Detalles de la versión de GNU/Linux instalada"
+
+if [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    echo -e "• Distribución:     ${BOLD}${CYAN}${PRETTY_NAME:-$NAME}${RESET}"
+    echo -e "• Versión:          ${GREEN}${VERSION:-N/A}${RESET}"
+    echo -e "• Codename:         ${YELLOW}${VERSION_CODENAME:-${UBUNTU_CODENAME:-N/A}}${RESET}"
+    echo -e "• ID Base:          ${MAGENTA}${ID_LIKE:-$ID}${RESET}"
+    echo -e "• Sitio web:        ${BLUE}${HOME_URL:-N/A}${RESET}"
+    echo
 fi
-echo ""
-read -p "Presione Enter para volver al menú..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script muestra información del sistema operativo utilizando los archivos de configuración típicos de Linux.
-# Dependiendo de la distribución, se utiliza `/etc/os-release` o `/etc/lsb-release` para obtener información sobre la versión y el nombre de la distribución.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+
+if command -v lsb_release >/dev/null 2>&1; then
+    echo -e "${BOLD}Detalles LSB:${RESET}"
+    lsb_release -a 2>/dev/null
+    echo
+fi
+
+echo -e "• Tiempo encendido (Uptime): $(uptime -p 2>/dev/null || uptime)"
+
+pausar

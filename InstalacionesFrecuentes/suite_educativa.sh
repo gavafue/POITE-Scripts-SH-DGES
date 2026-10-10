@@ -1,102 +1,94 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Instalador de Suite de Software Educativo para Laboratorios de Informática
+# ==============================================================================
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-# Colores
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-RESET='\033[0m'
+imprimir_encabezado "📚 SUITE DE SOFTWARE EDUCATIVO (DGES / URUGUAY)" "Herramientas pedagógicas, ofimática, ciencias, programación y multimedia"
 
-# Verificar si el script se ejecuta como root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}⚠️ Este script debe ejecutarse como root (use sudo).${RESET}"
+if ! asegurar_root; then
     exit 1
 fi
 
-# Verificar que APT esté disponible
-if ! command -v apt >/dev/null 2>&1; then
-    echo -e "${RED}❌ Este script solo es compatible con sistemas basados en Debian/Ubuntu.${RESET}"
-    exit 1
-fi
+instalar_lista() {
+    local nombre_categoria="$1"
+    shift
+    local paquetes=("$@")
 
-# Lista de paquetes a instalar
-PAQUETES=(
-    libreoffice
-    pdfarranger
-    gnome-dictionary
-    firefox
-    scratch
-    thonny
-    geany
-    kate
-    gcompris
-    kalzium
-    kstars
-    marble
-    kiwix-desktop
-    gimp
-    inkscape
-    krita
-    tuxpaint
-    vlc
-    audacity
-    obs-studio
-    shotcut
-    kdenlive
-    bleachbit
-    timeshift
-    synaptic
-    gparted
-    clamav
-    clamtk
-    gufw
-    keepassxc
-    onboard
-    orca
-    magnus
-    librecad
-    stellarium
-    celestia
-    tuxmath
-    tuxtype
-)
+    echo -e "${BOLD}${CYAN}Instalando categoría: $nombre_categoria...${RESET}"
+    echo "----------------------------------------------------------------------"
+    
+    local para_instalar=()
+    for pkg in "${paquetes[@]}"; do
+        if dpkg -s "$pkg" &>/dev/null; then
+            echo -e "✔️ Ya instalado: ${GREEN}$pkg${RESET}"
+        elif apt-cache show "$pkg" &>/dev/null; then
+            para_instalar+=("$pkg")
+        else
+            echo -e "⚠️  No disponible en repositorios: ${YELLOW}$pkg${RESET}"
+        fi
+    done
 
-# Mostrar lista de paquetes y pedir confirmación
-echo -e "${YELLOW}Se instalarán los siguientes paquetes:${RESET}"
-for paquete in "${PAQUETES[@]}"; do
-    echo "  - $paquete"
-done
-echo -e "${CYAN}¿Desea continuar con la instalación? (s/N)${RESET}"
-read -r respuesta
-if [[ ! "$respuesta" =~ ^[sS]$ ]]; then
-    echo -e "${RED}Instalación cancelada por el usuario.${RESET}"
-    exit 0
-fi
+    if [ ${#para_instalar[@]} -gt 0 ]; then
+        echo -e "${YELLOW}Instalando paquetes pendientes: ${para_instalar[*]}...${RESET}"
+        sudo apt-get install -y "${para_instalar[@]}" || true
+    else
+        imprimir_exito "Todos los paquetes de esta categoría ya están al día."
+    fi
+    echo
+}
 
-# Actualizar repositorios
-echo -e "${YELLOW}🔄 Actualizando repositorios...${RESET}"
-apt update -y
-apt upgrade -y
+PKGS_OFIMATICA=(libreoffice libreoffice-l10n-es pdfarranger vlc keepassxc bleachbit timeshift gparted gufw)
+PKGS_DEV=(thonny geany kate scratch)
+PKGS_CIENCIAS=(gcompris-qt kalzium kstars stellarium tuxmath tuxtype)
+PKGS_DISENO=(gimp inkscape krita tuxpaint audacity obs-studio kdenlive)
 
-# Instalación masiva
-echo -e "${CYAN}🚀 Instalando programas educativos...${RESET}"
-for paquete in "${PAQUETES[@]}"; do
-    echo -e "${CYAN}📦 Instalando: $paquete${RESET}"
-    apt install -y "$paquete" || echo -e "${RED}❌ No se pudo instalar $paquete${RESET}"
-done
+echo -e "Seleccione qué componentes desea instalar en este equipo:"
+echo -e "  ${GREEN}1)${RESET} 🌟 ${BOLD}Suite Educativa COMPLETA${RESET} (Todas las aplicaciones escolares)"
+echo -e "  ${GREEN}2)${RESET} 📝 Ofimática, Visores y Utilidades (LibreOffice, PDF, VLC, Seguridad)"
+echo -e "  ${GREEN}3)${RESET} 💻 Programación y Robótica (Thonny, Geany, Kate, Scratch)"
+echo -e "  ${GREEN}4)${RESET} 🔬 Ciencias, Astronomía y Matemáticas (Stellarium, GCompris, Kalzium)"
+echo -e "  ${GREEN}5)${RESET} 🎨 Arte, Diseño, Edición Gráfica y Video (GIMP, Inkscape, Krita, Audacity)"
+echo -e "  ${RED}0)${RESET} 🔙 Cancelar y volver"
+echo
+echo -ne "${BOLD}Seleccione una opción [0-5]: ${RESET}"
+read -r opcion
 
-# Fin
-echo -e "${GREEN}🎉 Instalación completa de la suite educativa. Reinicie para aplicar algunos cambios si es necesario.${RESET}"
-echo -e "${YELLOW}Presione ENTER para volver atrás...${RESET}"
-read
+case "$opcion" in
+    1)
+        sudo apt-get update -y
+        instalar_lista "Ofimática y Utilidades" "${PKGS_OFIMATICA[@]}"
+        instalar_lista "Programación y Robótica" "${PKGS_DEV[@]}"
+        instalar_lista "Ciencias y Matemáticas" "${PKGS_CIENCIAS[@]}"
+        instalar_lista "Arte y Multimedia" "${PKGS_DISENO[@]}"
+        imprimir_exito "Instalación de la Suite Educativa Completa finalizada."
+        ;;
+    2)
+        sudo apt-get update -y
+        instalar_lista "Ofimática y Utilidades" "${PKGS_OFIMATICA[@]}"
+        ;;
+    3)
+        sudo apt-get update -y
+        instalar_lista "Programación y Robótica" "${PKGS_DEV[@]}"
+        ;;
+    4)
+        sudo apt-get update -y
+        instalar_lista "Ciencias y Matemáticas" "${PKGS_CIENCIAS[@]}"
+        ;;
+    5)
+        sudo apt-get update -y
+        instalar_lista "Arte y Multimedia" "${PKGS_DISENO[@]}"
+        ;;
+    0)
+        imprimir_info "Operación cancelada."
+        ;;
+    *)
+        imprimir_error "Opción no válida."
+        ;;
+esac
 
-# Fin del script
-# Este script instala una serie de programas educativos en un sistema Linux basado en Debian/Ubuntu.
-# Se asegura de que el script se ejecute con privilegios de superusuario.
-# Primero verifica si APT está disponible y luego muestra una lista de los paquetes a instalar.
-# Pide confirmación al usuario antes de proceder con la instalación.
-# Luego actualiza los repositorios y procede a instalar cada paquete de la lista.
-# Finalmente, informa al usuario que la instalación ha finalizado y le pide que presione ENTER para volver atrás.
-# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.
+pausar

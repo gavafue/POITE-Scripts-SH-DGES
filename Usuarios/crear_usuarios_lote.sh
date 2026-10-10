@@ -1,33 +1,64 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Creación masiva de usuarios por lote (archivo CSV)
+# ==============================================================================
 
-read -p "Ingrese la ruta del archivo CSV (usuario,contraseña): " archivo
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-if [[ ! -f "$archivo" ]]; then
-  echo "⚠️ Archivo no encontrado."
-  exit 1
+imprimir_encabezado "👥 CREAR USUARIOS POR LOTES (CSV)" "Importación rápida de cuentas para grupos completos de estudiantes"
+
+if ! asegurar_root; then
+    exit 1
 fi
 
-while IFS=, read -r usuario password; do
-  if id "$usuario" &>/dev/null; then
-    echo "⏭ Usuario '$usuario' ya existe. Omitido."
-  else
-    sudo useradd -m "$usuario"
-    echo "$usuario:$password" | sudo chpasswd
-    echo "✅ Usuario '$usuario' creado."
-  fi
+echo -e "El archivo CSV debe tener el formato: ${BOLD}usuario,contraseña${RESET}"
+echo -e "Ejemplo:\n  alumno01,Liceo2026\n  alumno02,Liceo2026\n"
+
+read -e -p "📁 Ingrese la ruta del archivo CSV: " archivo
+
+if [[ ! -f "$archivo" ]]; then
+    imprimir_error "Archivo no encontrado: '$archivo'."
+    pausar
+    exit 1
+fi
+
+echo -e "${YELLOW}¿Desea crear un grupo secundario 'alumnos' para estos usuarios? (S/n): ${RESET}"
+read -r crear_grp
+if [[ -z "$crear_grp" || "$crear_grp" =~ ^[sS]$ ]]; then
+    sudo groupadd alumnos 2>/dev/null || true
+fi
+
+echo
+echo -e "${BOLD}Iniciando creación de cuentas...${RESET}"
+echo "----------------------------------------------------------------------"
+
+CREADOS=0
+OMITIDOS=0
+
+while IFS=, read -r usuario password || [[ -n "$usuario" ]]; do
+    # Limpiar espacios y retornos de carro de Windows (\r)
+    usuario=$(echo "$usuario" | tr -d '\r\n' | xargs)
+    password=$(echo "$password" | tr -d '\r\n' | xargs)
+
+    [[ -z "$usuario" || "$usuario" =~ ^# ]] && continue
+
+    if id "$usuario" &>/dev/null; then
+        echo -e "⏭️  Usuario ${YELLOW}'$usuario'${RESET} ya existe. Omitido."
+        ((OMITIDOS++))
+    else
+        if sudo useradd -m -s /bin/bash -g alumnos "$usuario" 2>/dev/null || sudo useradd -m -s /bin/bash "$usuario"; then
+            echo "$usuario:$password" | sudo chpasswd
+            imprimir_exito "Usuario '$usuario' creado correctamente con shell /bin/bash."
+            ((CREADOS++))
+        else
+            imprimir_error "No se pudo crear el usuario '$usuario'."
+        fi
+    fi
 done < "$archivo"
 
-read -p "Presione enter para continuar..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script crea usuarios en el sistema Linux a partir de un archivo CSV que contiene pares de usuario y contraseña.
-# Solicita al usuario que ingrese la ruta del archivo CSV y verifica si existe.
-# Si el archivo no existe, se muestra un mensaje de advertencia y se sale del script.
-# Si el archivo existe, se lee línea por línea y se crea cada usuario con su respectiva contraseña.
-# Si el usuario ya existe, se omite y se muestra un mensaje.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
-# Se recomienda utilizar un archivo CSV con el siguiente formato:
-# usuario1,contraseña1
-# usuario2,contraseña2
-# usuario3,contraseña3
+echo "----------------------------------------------------------------------"
+echo -e "${BOLD}Resumen:${RESET} Creados: ${GREEN}$CREADOS${RESET} | Omitidos: ${YELLOW}$OMITIDOS${RESET}"
+pausar

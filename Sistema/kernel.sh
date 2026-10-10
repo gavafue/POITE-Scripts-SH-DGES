@@ -1,12 +1,21 @@
 #!/bin/bash
-clear
-echo ">>> INFORMACIÓN DEL KERNEL <<<"
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Información del Kernel Linux
+# ==============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
+
+imprimir_encabezado "🧩 INFORMACIÓN DEL KERNEL LINUX" "Versión del núcleo, arquitectura y fecha de compilación"
+
+echo -e "• Versión del Kernel:    ${BOLD}${GREEN}$(uname -r)${RESET}"
+echo -e "• Arquitectura:          ${BOLD}${CYAN}$(uname -m)${RESET}"
+echo -e "• Nombre del Host:       ${BOLD}${YELLOW}$(uname -n)${RESET}"
+echo -e "• Fecha de Compilación:  $(uname -v)"
+echo
+echo -e "${BOLD}Salida completa (uname -a):${RESET}"
 uname -a
-echo ""
-read -p "Presione Enter para volver al menú..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script muestra información del kernel del sistema operativo Linux utilizando el comando `uname -a`.
-# La información incluye el nombre del kernel, la versión, la arquitectura y otros detalles relevantes.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+
+pausar

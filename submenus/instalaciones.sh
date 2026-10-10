@@ -1,44 +1,36 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Submenú: Instalaciones Frecuentes
+# ==============================================================================
 
-# Colores
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[1;34m'
-CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
-MAGENTA='\033[1;35m'
-RESET='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
 while true; do
-  clear
-  echo -e "${BLUE}========== 🧩 MENÚ DE INSTALACIONES ==========${RESET}"
-  echo -e "${CYAN}Seleccione una opción para instalar aplicaciones comunes.${RESET}"
-  echo -e "${YELLOW}==============================================${RESET}"
-  echo -e "${GREEN}1) 🦁 Instalar Navegador Brave${RESET}"
-  echo -e "${GREEN}2) 🧑‍💻 Instalar Visual Studio Code${RESET}"
-  echo -e "${GREEN}3) 🌐 Instalar Navegador Chrome${RESET}"
-  echo -e "${GREEN}4) 📚 Instalar Suite Educativa${RESET}"
-  echo -e "${CYAN}     - Esta opción instalará: libreoffice, pdfarranger, gnome-dictionary, firefox, scratch, thonny, geany, kate, gcompris, kalzium, kstars, marble, kiwix-desktop, gimp, inkscape, krita, tuxpaint, vlc, audacity, obs-studio, shotcut, kdenlive, bleachbit, timeshift, synaptic, gparted, clamav, clamtk, gufw, keepassxc, onboard, orca, magnus, librecad, stellarium, celestia, tuxmath, tuxtype.${RESET}"
-  echo -e "${GREEN}5) Instalar Wine${RESET}"
-  echo -e "${RED}0) 🔙 Volver al menú principal${RESET}"
-  echo -e "${YELLOW}==============================================${RESET}"
-  echo -ne "${MAGENTA}Seleccione una opción: ${RESET}"
-  read opcion
+    imprimir_encabezado "🧩 INSTALACIONES FRECUENTES Y PAQUETES DE AULA" "Instalación guiada de software pedagógico y herramientas de desarrollo"
 
-  case $opcion in
-    1) bash ./InstalacionesFrecuentes/instalar_brave.sh ;;
-    2) bash ./InstalacionesFrecuentes/instalar_visual_studio_code.sh ;;
-    3) bash ./InstalacionesFrecuentes/instalar_chrome.sh ;;
-    4) bash ./InstalacionesFrecuentes/suite_educativa.sh ;;
-    5) bash ./InstalacionesFrecuentes/instalar_wine.sh ;;
-    0) 
-      echo -e "${RED}↩️  Volviendo al menú principal...${RESET}" 
-      sleep 1
-      break 
-      ;;
-    *) 
-      echo -e "${RED}❌ Opción inválida. Presione Enter para continuar...${RESET}"
-      read
-      ;;
-  esac
+    echo -e "  ${GREEN}1)${RESET}  🧑‍💻 Visual Studio Code (Editor de código oficial)"
+    echo -e "  ${GREEN}2)${RESET}  🌐 Google Chrome (Navegador estándar con soporte multimedia)"
+    echo -e "  ${GREEN}3)${RESET}  🦁 Brave Browser (Navegador rápido con bloqueo de anuncios)"
+    echo -e "  ${GREEN}4)${RESET}  🍷 WineHQ (Capa de compatibilidad para software Windows)"
+    echo -e "  ${GREEN}5)${RESET}  📚 Suite de Software Educativo (Por áreas o completa)"
+    echo -e "  ${RED}0)${RESET}  🔙 Volver al menú principal"
+    echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
+    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-5]: ${RESET}"
+    read -r opcion
+
+    case "$opcion" in
+        1) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_visual_studio_code.sh" ;;
+        2) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_chrome.sh" ;;
+        3) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_brave.sh" ;;
+        4) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_wine.sh" ;;
+        5) bash "$BASE_DIR/InstalacionesFrecuentes/suite_educativa.sh" ;;
+        0) break ;;
+        *)
+            imprimir_error "Opción no válida."
+            sleep 1
+            ;;
+    esac
 done

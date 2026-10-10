@@ -1,53 +1,59 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Verificar y restaurar repositorios oficiales APT
+# ==============================================================================
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-# =====================================
-# Verificar y agregar repositorios APT
-# =====================================
-# Autor: Gabriel Vázquez
-# Ubuntu focal (20.04)
-# =====================================
+imprimir_encabezado "📦 VERIFICAR REPOSITORIOS OFICIALES APT" "Garantiza acceso a paquetes base (main, restricted, universe, multiverse)"
 
-# Repositorios necesarios
-REPOS=(
-  "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
-  "deb-src http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse"
-  "deb-src http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse"
-  "deb-src http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse"
-  "deb-src http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse"
-  "deb http://archive.canonical.com/ubuntu focal partner"
-  "deb-src http://archive.canonical.com/ubuntu focal partner"
-)
+INFO_DISTRO=$(detectar_distro)
+CODENAME=$(echo "$INFO_DISTRO" | cut -d'|' -f3)
 
-SOURCES_LIST="/etc/apt/sources.list"
-BACKUP_FILE="/etc/apt/sources.list.bak"
+# Fallback si no se detecta
+CODENAME="${CODENAME:-focal}"
 
-# Crear copia de seguridad si no existe
-if [ ! -f "$BACKUP_FILE" ]; then
-  echo "🔒 Creando copia de respaldo en $BACKUP_FILE"
-  sudo cp "$SOURCES_LIST" "$BACKUP_FILE"
+echo -e "Distribución detectada: ${BOLD}${CYAN}$INFO_DISTRO${RESET}"
+echo -e "Nombre clave de versión: ${BOLD}${GREEN}$CODENAME${RESET}"
+echo
+
+if ! asegurar_root; then
+    exit 1
 fi
 
-# Verificar y agregar repositorios
+SOURCES_LIST="/etc/apt/sources.list"
+BACKUP_FILE="/etc/apt/sources.list.bak-$(date +%Y%m%d%H%M%S)"
+
+echo -e "🔒 Creando copia de respaldo en: ${CYAN}$BACKUP_FILE${RESET}"
+sudo cp "$SOURCES_LIST" "$BACKUP_FILE"
+
+REPOS=(
+  "deb http://archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe multiverse"
+  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe multiverse"
+  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricted universe multiverse"
+  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-backports main restricted universe multiverse"
+)
+
+echo
+echo -e "${BOLD}Comprobando repositorios oficiales para '$CODENAME':${RESET}"
 for repo in "${REPOS[@]}"; do
-  if grep -Fxq "$repo" "$SOURCES_LIST"; then
-    echo "✔️ Repositorio ya presente: $repo"
-  else
-    echo "➕ Agregando repositorio: $repo"
-    echo "$repo" | sudo tee -a "$SOURCES_LIST" > /dev/null
-  fi
+    if grep -qE "^\s*deb\s+.*$CODENAME" "$SOURCES_LIST" 2>/dev/null; then
+        echo -e "✔️ Rama presente: ${CYAN}$repo${RESET}"
+    else
+        echo -e "➕ Agregando: ${YELLOW}$repo${RESET}"
+        echo "$repo" | sudo tee -a "$SOURCES_LIST" > /dev/null
+    fi
 done
 
-echo -e "\n✅ Revisión completa. Puede ejecutar: sudo apt update"
-echo "Volviendo al menú principal..."
-read -p "Presione enter para continuar..."
-# Fin del script
-# Este script verifica y agrega repositorios APT necesarios para Ubuntu 20.04 (focal).
-# Primero, crea una copia de seguridad del archivo de fuentes APT si no existe.
-# Luego, verifica si cada repositorio ya está presente en el archivo de fuentes.
-# Si un repositorio no está presente, lo agrega.
-# Al final, muestra un mensaje de confirmación y espera a que el usuario presione enter para continuar y volver al menú principal.
+echo
+echo -e "${YELLOW}¿Desea actualizar la lista de paquetes ahora (apt update)? (S/n): ${RESET}"
+read -r resp
+if [[ -z "$resp" || "$resp" =~ ^[sS]$ ]]; then
+    sudo apt update
+fi
+
+imprimir_exito "Verificación de repositorios completada."
+pausar

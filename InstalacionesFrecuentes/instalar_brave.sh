@@ -1,59 +1,47 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Instalador de Brave Browser (Privacidad y bajo consumo)
+# ==============================================================================
 
-# Colores
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
-RESET='\033[0m'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-# Verificar permisos
-if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}⚠️ Este script debe ejecutarse como root (use sudo).${RESET}"
-  exit 1
+imprimir_encabezado "🦁 INSTALACIÓN DE BRAVE BROWSER" "Navegador de alta velocidad con bloqueo nativo de publicidad para el aula"
+
+if ! asegurar_root; then
+    exit 1
 fi
 
-echo -e "${CYAN}🚀 Iniciando instalación del navegador Brave...${RESET}"
+if command -v brave-browser >/dev/null 2>&1; then
+    imprimir_info "Brave Browser ya se encuentra instalado ($(brave-browser --version 2>/dev/null))."
+    pausar
+    exit 0
+fi
 
-# Paso 1: Instalar curl si no está presente
-echo -e "${YELLOW}🔍 Verificando si 'curl' está instalado...${RESET}"
-if ! command -v curl >/dev/null 2>&1; then
-  echo -e "${YELLOW}📦 Instalando curl...${RESET}"
-  apt update && apt install -y curl
+echo -e "${CYAN}1. Instalando curl y dependencias de transporte...${RESET}"
+sudo apt-get update -y
+sudo apt-get install -y curl apt-transport-https
+
+echo
+echo -e "${CYAN}2. Descargando clave GPG oficial de Brave...${RESET}"
+sudo mkdir -p /usr/share/keyrings
+sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+echo
+echo -e "${CYAN}3. Registrando repositorio oficial APT (línea única)...${RESET}"
+echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null
+
+echo
+echo -e "${CYAN}4. Instalando Brave Browser...${RESET}"
+sudo apt-get update -y
+sudo apt-get install -y brave-browser
+
+if command -v brave-browser >/dev/null 2>&1; then
+    imprimir_exito "Brave Browser instalado correctamente. Ejecute 'brave-browser' o búscalo en el menú."
 else
-  echo -e "${GREEN}✅ 'curl' ya está instalado.${RESET}"
+    imprimir_error "Ocurrió un error al instalar Brave Browser."
 fi
 
-# Paso 2: Descargar clave GPG
-echo -e "${CYAN}🔑 Descargando clave GPG del repositorio de Brave...${RESET}"
-curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg \
-  https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-
-if [ $? -ne 0 ]; then
-  echo -e "${RED}❌ Error al descargar la clave GPG. Abortando.${RESET}"
-  exit 1
-fi
-
-# Paso 3: Agregar repositorio a sources.list.d
-echo -e "${CYAN}➕ Agregando repositorio de Brave a APT...${RESET}"
-echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] \
-https://brave-browser-apt-release.s3.brave.com/ stable main" \
-> /etc/apt/sources.list.d/brave-browser-release.list
-
-# Paso 4: Actualizar APT
-echo -e "${YELLOW}🔄 Actualizando listas de paquetes...${RESET}"
-apt update
-
-# Paso 5: Instalar Brave
-echo -e "${CYAN}📦 Instalando Brave Browser...${RESET}"
-apt install -y brave-browser
-
-if [ $? -eq 0 ]; then
-  echo -e "${GREEN}✅ Brave se ha instalado correctamente.${RESET}"
-else
-  echo -e "${RED}❌ Hubo un problema durante la instalación de Brave.${RESET}"
-  exit 1
-fi
-
-# Fin
-echo -e "${GREEN}🎉 ¡Instalación completa! Puede abrir Brave desde el menú o ejecutando 'brave-browser'.${RESET}"
+pausar

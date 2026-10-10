@@ -1,56 +1,35 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Limpiar archivo de IPs registradas
+# ==============================================================================
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-# Archivo donde se registran las IPs
-ARCHIVO_IPS="./RegistrarIP/ips.txt"
+imprimir_encabezado "🧹 VACIAR REGISTRO DE IPS" "Elimina la lista acumulada de direcciones IP del laboratorio"
 
-# Colores para salida
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RESET='\033[0m'
-
-# Validar si existe el directorio
-if [[ ! -d "./RegistrarIP" ]]; then
-  echo -e "${RED}❌ El directorio './RegistrarIP' no existe.${RESET}"
-  echo -e "${YELLOW}ℹ️  Asegúrate de que el script se está ejecutando desde el directorio correcto.${RESET}"
-  read -p "Presione Enter para volver al menú..."
-  exit 1
-fi
-
-# Validar si existe el archivo
 if [[ ! -f "$ARCHIVO_IPS" ]]; then
-  echo -e "${RED}❌ El archivo '$ARCHIVO_IPS' no existe.${RESET}"
-  echo -e "${YELLOW}ℹ️  Puedes crearlo con la función Registrar IP${RESET}"
-  read -p "Presione Enter para volver al menú..."
-  exit 1
+    imprimir_info "El archivo $ARCHIVO_IPS no existe o ya está vacío."
+    touch "$ARCHIVO_IPS"
+    pausar
+    exit 0
 fi
 
-# Validar si el archivo es escribible
-if [[ ! -w "$ARCHIVO_IPS" ]]; then
-  echo -e "${RED}❌ El archivo '$ARCHIVO_IPS' no tiene permisos de escritura.${RESET}"
-  echo -e "${YELLOW}🔐 Solución: sudo chmod +w $ARCHIVO_IPS${RESET}"
-  read -p "Presione Enter para volver al menú..."
-  exit 1
-fi
+CANTIDAD=$(wc -l < "$ARCHIVO_IPS" 2>/dev/null || echo 0)
+echo -e "Actualmente hay ${BOLD}$CANTIDAD${RESET} direcciones registradas en:"
+echo -e "${CYAN}$ARCHIVO_IPS${RESET}"
+echo
 
-# Vaciar el archivo
-> "$ARCHIVO_IPS"
+echo -ne "${BOLD}${RED}¿Está seguro de que desea vaciar el archivo? (s/N): ${RESET}"
+read -r respuesta
 
-# Confirmar operación
-if [[ $? -eq 0 ]]; then
-  echo -e "${GREEN}✅ El archivo '$ARCHIVO_IPS' ha sido vaciado exitosamente.${RESET}"
+if [[ "$respuesta" =~ ^[sS]$ ]]; then
+    > "$ARCHIVO_IPS"
+    imprimir_exito "El archivo de IPs ha sido vaciado exitosamente."
 else
-  echo -e "${RED}❌ Ocurrió un error al intentar vaciar el archivo.${RESET}"
+    imprimir_info "Operación cancelada. El archivo se mantiene intacto."
 fi
 
-# Pausa final
-read -p "Presione Enter para volver al menú..."
-
-# Fin del script
-# Este script limpia el archivo de IPs registrado en el directorio ./RegistrarIP.
-# Primero verifica si el directorio y el archivo existen.
-# Luego, valida si el archivo es escribible.
-# Si todo está en orden, vacía el archivo y confirma la operación.
-# Se recomienda ejecutar este script con permisos de superusuario para un funcionamiento óptimo.
+pausar

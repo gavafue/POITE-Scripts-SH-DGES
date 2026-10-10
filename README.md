@@ -1,146 +1,137 @@
-# 🖥️ POITE-Scripts-SH-DGES
+# 🖥️ Asistente POITE · DGES Uruguay
 
-¡Hola! Soy **Gabriel Vázquez**, profesor de informática en Uruguay. Este proyecto nació de mi experiencia diaria en los laboratorios educativos de la **DGES** (Dirección General de Educación Secundaria), donde busco facilitar el trabajo cotidiano de docentes y POITES de aula.
+Suite interactiva en **Bash** para la administración ágil, diagnóstico de redes, mantenimiento de sistemas y automatización en laboratorios educativos **GNU/Linux** de la **Dirección General de Educación Secundaria (DGES - ANEP)**.
 
----
+Desarrollado y mantenido por el **Prof. Gabriel Vázquez** (Docente de Informática egresado de INET / CFE).
 
-## 📌 Descripción
-
-Desarrollé este **script Bash interactivo** para simplificar la administración de sistemas **GNU/Linux** en los laboratorios. Mi objetivo es que tanto docentes como POITES puedan gestionar tareas comunes de manera más simple y rápida, a través de un menú intuitivo que automatiza acciones como:
-
-- 🌐 **Diagnóstico de red**
-- 👥 **Gestión de cuentas de usuario**
-- 🧹 **Limpieza y mantenimiento**
-- 💻 **Revisión de información del sistema**
-- ⚙️ **Accesos rápidos a configuraciones útiles**
-
-> **Objetivo:** Optimizar el trabajo en los laboratorios, brindando una herramienta accesible desde la consola, con una interfaz visual clara (colores y emojis).
+[![Licencia](https://img.shields.io/badge/Licencia-GPL--3.0-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Bash](https://img.shields.io/badge/Shell-Bash%205+-4EAA25?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Linux](https://img.shields.io/badge/Plataforma-Ubuntu%20%7C%20Debian%20%7C%20Ceibal-FCC624?logo=linux&logoColor=black)](https://www.kernel.org)
+[![Contacto](https://img.shields.io/badge/Ceibal-Docente-00833E?logo=gmail&logoColor=white)](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
 
 ---
 
-## 👤 Sobre mí
+## 🎯 Propósito del Proyecto
 
-**Gabriel Vázquez**  
-*Profesor de informática – Uruguay*  
-[![Email](https://img.shields.io/badge/email-gabriel.vazquez%40docente.ceibal.edu.uy-blue?style=flat-square&logo=gmail)](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
+En el trabajo diario de los **laboratorios de informática liceales** y aulas tecnológicas, los docentes y Profesores Orientadores en Informática y Tecnología Educativa (**POITE**) enfrentan tareas repetitivas en múltiples equipos:
 
----
+* Computadoras que pierden la hora por **baterías CMOS de la BIOS agotadas**, impidiendo la navegación HTTPS por errores de certificados SSL.
+* Equipos que requieren configuración de **Proxy institucional de DGES** para actualizar paquetes o acceder a repositorios oficiales.
+* Creación manual o por lotes de **cuentas de estudiantes** con permisos controlados (evitando privilegios innecesarios de `sudo`).
+* **Distribución remota masiva** de configuraciones o scripts a través de la red local (LAN) por SSH utilizando listas de IPs o direcciones MAC.
+* Instalación de programas pedagógicos esenciales y suites ofimáticas sin lidiar con comandos complejos en terminal.
 
-## 🎯 Objetivo del proyecto
-
-Facilitar las tareas frecuentes de mantenimiento y administración en los laboratorios informáticos de la **DGES**, permitiendo al personal educativo:
-
-- 🚀 **Agilizar tareas rutinarias**
-- ✅ **Minimizar errores de ejecución**
-- ⏱️ **Mejorar el tiempo de respuesta ante problemas comunes**
-- 🛠️ **Promover la autonomía técnica en la gestión de equipos**
+Este asistente transforma todas estas operaciones en un menú visual, rápido, guiado e intuitivo.
 
 ---
 
-## 🗃️ Contenido del proyecto
+## 🚀 Instalación y Acceso Global (`poite`)
 
-| Archivo/Carpeta | Descripción                                      |
-|:---------------:|:-------------------------------------------------|
-| [`menu.sh`](menu.sh) | Script principal con menú interactivo            |
-| `.git/`         | Estructura del repositorio Git (control de versiones) |
+Puedes ejecutar el asistente directamente o instalar el comando global para abrirlo en cualquier momento desde la terminal con una sola palabra:
 
----
-
-## 📂 Estructura del menú
-
-Al ejecutar <kbd>menu.sh</kbd>, verás un menú principal con las siguientes opciones:
-
+### Opción 1: Instalación del Comando Global (Recomendada)
+```bash
+git clone https://github.com/gavafue/POITE-Scripts-SH-DGES.git
+cd POITE-Scripts-SH-DGES
+sudo ./instalar_comando.sh
 ```
-1. 🌐 Red y conectividad
-2. 👥 Usuarios y cuentas
-3. 💻 Información del sistema
-4. 🧹 Mantenimiento
-5. 🧩 Instalaciones y herramientas
-6. 🔧 Herramientas técnicas
-7. 📦 Scripts adicionales
-8. 🔚 Salir
+Una vez instalado, simplemente escribe en cualquier consola:
+```bash
+poite
 ```
 
-Cada opción abre un submenú o ejecuta tareas automatizadas.
+### Opción 2: Ejecución Directa
+```bash
+cd POITE-Scripts-SH-DGES
+chmod +x menu.sh
+./menu.sh
+```
 
 ---
 
-## ▶️ Cómo ejecutar
+## 🧭 Estructura y Módulos de la Suite
 
-1. **Abrí una terminal.**
-2. **Navegá al directorio del script:**
-   ```bash
-   cd POITE-Scripts-SH-DGES
-   ```
-3. **Asigná permisos de ejecución (si es necesario):**
-   ```bash
-   chmod +x -R .
-   ```
-4. **Ejecutá el script:**
-   ```bash
-   ./menu.sh
-   ```
+```text
+POITE-Scripts-SH-DGES/
+├── menu.sh                         # 🖥️ Menú principal interactivo con métricas en vivo
+├── instalar_comando.sh             # 🚀 Enlace global /usr/local/bin/poite
+├── lib/
+│   └── comun.sh                    # 🧰 Librería central: detección de distro, IPs, sudo y estilos
+├── Red/
+│   ├── diagnostico_red.sh          # ⚡ Test exprés de conectividad, Gateway, DNS y Ceibal
+│   ├── proxy_DGES.sh               # 🛡️ Gestor de Proxy DGES (activar, cambiar IP, desactivar)
+│   ├── reiniciar_red.sh            # 🔄 Reinicio seguro de NetworkManager y networking
+│   ├── chequear_repositorios.sh    # 📦 Verificación dinámica de repositorios oficiales APT
+│   ├── registrar_ip.sh             # 📝 Registro de IP del host en ips.txt
+│   ├── conexion_remota_ip.sh       # 📤 Distribución y ejecución remota por SSH (IP)
+│   ├── limpiar_archivo_ip.sh       # 🧹 Vaciado seguro del registro de IPs
+│   ├── registrar_mac.sh            # 🏷️ Detección y registro de dirección física MAC
+│   ├── conexion_remota_mac.sh      # 📤 Descubrimiento ARP y ejecución remota por MAC
+│   └── limpiar_archivo_mac.sh      # 🧹 Vaciado seguro del registro de MACs
+├── Usuarios/
+│   ├── crear_usuario.sh            # ➕ Creación individual con opción de rol alumno o sudo
+│   ├── crear_usuarios_lote.sh      # 📂 Importación masiva por CSV con shell /bin/bash y CRLF fix
+│   ├── cambiar_usuario.sh          # 🔁 Autologin con soporte dual para LightDM y GDM3
+│   ├── resetear_password.sh        # 🔑 Restablecimiento asistido de contraseñas
+│   └── eliminar_usuario.sh         # ➖ Eliminación segura con protección de cuentas críticas
+├── Sistema/
+│   ├── cpu.sh                      # 🧠 Información detallada de CPU (lscpu, modelo, núcleos)
+│   ├── memoria.sh                  # 🪫 Memoria RAM y Swap con porcentaje de ocupación
+│   ├── discos.sh                   # 💽 Almacenamiento, puntos de montaje y particiones
+│   ├── so.sh                       # 🏷️ Sistema operativo, versión y tiempo encendido (uptime)
+│   ├── kernel.sh                   # 🧩 Versión del kernel Linux y arquitectura
+│   ├── procesos.sh                 # 🧮 Visor interactivo de procesos activos
+│   ├── hardware.sh                 # 🖧 Reporte completo de hardware con lshw
+│   ├── variables.sh                # 📦 Variables de entorno de la sesión
+│   └── completo.sh                 # 📋 Auditoría integral consolidada del equipo
+├── Mantenimiento/
+│   ├── arreglar_reloj_ubuntu.sh    # 🕒 Sincronización NTP y zona horaria (solución pila BIOS agotada)
+│   ├── reparar_dependencias.sh     # 🧱 Reparación segura de dpkg y paquetes APT bloqueados
+│   ├── limpieza_disco.sh           # 🧹 Liberación de espacio (cachés, thumbnails, journalctl)
+│   └── ssh.sh                      # 🔐 Instalación y arranque del servicio OpenSSH
+├── InstalacionesFrecuentes/
+│   ├── instalar_visual_studio_code.sh # 🧑‍💻 Instalador oficial de VS Code (keyrings modernos)
+│   ├── instalar_chrome.sh          # 🌐 Google Chrome oficial con validación de arquitectura
+│   ├── instalar_brave.sh           # 🦁 Brave Browser con repositorio APT corregido
+│   ├── instalar_wine.sh            # 🍷 WineHQ con arquitectura i386 y fallback automático
+│   └── suite_educativa.sh          # 📚 Suite clasificada por áreas (ofimática, programación, ciencias, arte)
+└── RegistrarIP/                    # 📁 Directorio central de persistencia
+    ├── ips.txt                     # Listado de IPs registradas
+    ├── macs.txt                    # Listado de MACs registradas
+    ├── remoto.sh                   # Script a distribuir remotamente por el aula
+    └── registro_ejecuciones.log    # Historial de ejecuciones SSH
+```
 
 ---
 
-## ⚙️ Requisitos
+## 🛠️ Aspectos Técnicos Destacados de Ingeniería
 
-- Sistema operativo: **GNU/Linux** (preferentemente Debian/Ubuntu)
-- **Bash shell**
-- Permisos de **superusuario** para algunas tareas (ej. creación de usuarios, instalación de software)
+1. **Resolución Canónica de Rutas:**
+   Todos los scripts resuelven la ruta absoluta mediante `BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"`, permitiendo invocarlos desde cualquier directorio de trabajo o a través de enlaces simbólicos sin fallos de ruta relativa.
 
----
+2. **Detección Automática de Distribución:**
+   El módulo central identifica el nombre, versión y codename de la distribución (`focal`, `jammy`, `noble`, `bookworm`), adaptando los repositorios APT y evitando conflictos entre diferentes versiones de Ubuntu/Debian.
 
-## 🧪 Ejemplos de funciones incluidas
+3. **Autologin Híbrido:**
+   Compatible tanto con entornos ligeros basados en **LightDM** (Xubuntu, Lubuntu, Ceibal Linux) como con entornos de escritorio basados en **GDM3** (Ubuntu estándar con GNOME).
 
-Incluye funciones como:
-
-- Configurar el proxy de DGES en la terminal
-- Comunicación de red entre equipos del laboratorio
-- Reparar repositorios y dependencias de paquetes
-- Creación de usuarios masivos
-- Operaciones en red con SSH por lotes.
+4. **Tratamiento Seguro de Datos:**
+   La creación de usuarios por lotes normaliza los saltos de línea Windows (`CRLF / \r\n`) provenientes de archivos exportados desde Excel o LibreOffice Calc, y asigna explícitamente `/bin/bash` para asegurar un entorno de terminal completo para los estudiantes.
 
 ---
 
-## 🔐 Seguridad
+## 👤 Autor
 
-Este script **no recoge información personal** ni se conecta a servidores externos sin interacción del usuario.  
-> **Nota:** Muchas operaciones requieren permisos de root.  
-> **Recomendación:** Revisá el código antes de usarlo en entornos productivos.
-
----
-
-## 🧱 Posibles mejoras futuras
-
-Estoy pensando en agregar:
-
-- Inclusión de logs de ejecución
-- Exportación de reportes del sistema
-- Modularización en scripts externos por categoría
-- Detección automática del entorno (distribución, red, etc.)
+**Prof. Gabriel Vázquez**  
+*Docente de Informática — Uruguay*  
+* Instituto Normal de Enseñanza Técnica (INET - CFE / ANEP)
+* DGETP - UTU · Instituto Superior Brazo Oriental (ISBO)
+* DGES - Secundaria · POITE en Educación Media
+* 📧 Correo: [gabriel.vazquez@docente.ceibal.edu.uy](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
+* 💼 LinkedIn: [linkedin.com/in/gavafue](https://www.linkedin.com/in/gavafue)
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto se distribuye de forma libre para la colaboración de docentes y POITES que deseen contribuir.
-
----
-
-## 🤝 Contribuciones
-
-¡Las contribuciones son bienvenidas!  
-Si querés sumar mejoras:
-
-1. Hacé un **fork** del repositorio.
-2. Creá una **rama**.
-3. Subí los cambios con una descripción clara.
-4. Abrí un **Pull Request**.
-
----
-
-## 📬 Contacto
-
-¿Sugerencias, dudas o querés colaborar?  
-[![Email](https://img.shields.io/badge/email-gabriel.vazquez%40docente.ceibal.edu.uy-blue?style=flat-square&logo=gmail)](mailto:gabriel.vazquez@docente.ceibal.edu.uy)
+Este proyecto se distribuye bajo la Licencia **GPL-3.0**. Libre para uso, estudio, modificación y redistribución en toda la comunidad educativa pública.

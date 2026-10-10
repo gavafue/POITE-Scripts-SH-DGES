@@ -1,21 +1,49 @@
 #!/bin/bash
+# ==============================================================================
+# ASISTENTE POITE - DGES / URUGUAY
+# Creación de usuario individual con control de privilegios de aula
+# ==============================================================================
 
-read -p "Ingrese el nombre del nuevo usuario (ej: liceo): " user
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/comun.sh"
 
-if id "$user" &>/dev/null; then
-  echo "⚠️ El usuario '$user' ya existe."
-else
-  sudo adduser "$user"
-  sudo usermod -aG sudo "$user"
-  echo "✅ Usuario '$user' creado y agregado al grupo sudo."
+imprimir_encabezado "👥 CREAR NUEVO USUARIO" "Configuración de cuentas para alumnos, docentes o administración"
+
+if ! asegurar_root; then
+    exit 1
 fi
 
-read -p "Presione enter para continuar..."
-echo "Volviendo al menú principal..."
-# Fin del script
-# Este script crea un nuevo usuario en el sistema y lo agrega al grupo sudo.
-# Si el usuario ya existe, se muestra un mensaje de advertencia.
-# El script solicita al usuario que ingrese el nombre del nuevo usuario y luego verifica si ya existe.
-# Si el usuario no existe, se crea y se le otorgan privilegios de sudo.
-# Al final, se espera que el usuario presione enter para continuar y luego se vuelve al menú principal.
-# Se recomienda ejecutar este script con permisos de superusuario (root) para garantizar que todas las funciones del asistente funcionen correctamente.
+read -p "👤 Ingrese el nombre de usuario (ej: alumno / grupo1 / profe): " user
+
+# Validar formato de nombre de usuario Unix
+if [[ ! "$user" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+    imprimir_error "El nombre de usuario solo debe contener letras minúsculas, números y guiones."
+    pausar
+    exit 1
+fi
+
+if id "$user" &>/dev/null; then
+    imprimir_aviso "El usuario '$user' ya existe en este sistema."
+    pausar
+    exit 0
+fi
+
+echo
+echo -e "${YELLOW}¿El usuario debe tener permisos de administrador (sudo)?${RESET}"
+echo "  [s] Sí (para docentes / administradores)"
+echo "  [n] No (recomendado para estudiantes / invitados)"
+read -p "Seleccione [s/N]: " es_admin
+
+if sudo adduser --gecos "" "$user"; then
+    if [[ "$es_admin" =~ ^[sS]$ ]]; then
+        sudo usermod -aG sudo "$user" 2>/dev/null || sudo usermod -aG wheel "$user" 2>/dev/null
+        imprimir_exito "Usuario '$user' creado CON permisos de administrador (sudo)."
+    else
+        imprimir_exito "Usuario estándar '$user' creado (sin privilegios de root)."
+    fi
+else
+    imprimir_error "Ocurrió un error al crear el usuario '$user'."
+fi
+
+pausar
