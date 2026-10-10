@@ -45,26 +45,29 @@ while true; do
     echo -e "${BOLD}${MAGENTA}Seleccione una categoría de administración:${RESET}"
     echo
     echo -e "  ${GREEN}1)${RESET} ${BOLD}🌐 Red y Conectividad${RESET}"
-    echo -e "     ${CYAN}Diagnóstico de red, Proxy DGES, registro de IPs/MACs y control SSH${RESET}"
+    echo -e "     ${CYAN}Mapeo lab1-pcXX, Proxy DGES, despliegue SSH, Ansible y control remoto${RESET}"
     echo
     echo -e "  ${GREEN}2)${RESET} ${BOLD}👥 Usuarios y Cuentas${RESET}"
-    echo -e "     ${CYAN}Creación individual/lotes, permisos de alumnos, autologin y claves${RESET}"
+    echo -e "     ${CYAN}Creación individual/lotes, autologin de aula, claves y permisos${RESET}"
     echo
-    echo -e "  ${GREEN}3)${RESET} ${BOLD}💻 Información del Sistema${RESET}"
-    echo -e "     ${CYAN}Auditoría de hardware, CPU, memoria RAM, particiones y procesos${RESET}"
+    echo -e "  ${GREEN}3)${RESET} ${BOLD}🚀 Replicación de Laboratorio (Sin Clonar Discos)${RESET}"
+    echo -e "     ${CYAN}Capturar PC Maestra y desplegar configuración completa a PCs limpias${RESET}"
     echo
     echo -e "  ${GREEN}4)${RESET} ${BOLD}🧹 Mantenimiento del Sistema${RESET}"
-    echo -e "     ${CYAN}Reparación $PKG_MANAGER, sincronización de reloj NTP/BIOS y limpieza profunda${RESET}"
+    echo -e "     ${CYAN}Reparación $PKG_MANAGER, repositorios, sincronización horaria y limpieza${RESET}"
     echo
     echo -e "  ${GREEN}5)${RESET} ${BOLD}🧩 Instalaciones Frecuentes${RESET}"
-    echo -e "     ${CYAN}Visual Studio Code, navegadores web, Wine y Suite Educativa completa${RESET}"
+    echo -e "     ${CYAN}Visual Studio Code, navegadores web, Wine, Ansible y Suite Educativa${RESET}"
     echo
-    echo -e "  ${GREEN}6)${RESET} ${BOLD}⚡ Diagnóstico Rápido del Laboratorio${RESET}"
-    echo -e "     ${CYAN}Chequeo integral exprés de disco, red, DNS y conectividad${RESET}"
+    echo -e "  ${GREEN}6)${RESET} ${BOLD}💻 Información del Sistema${RESET}"
+    echo -e "     ${CYAN}Auditoría de hardware, CPU, memoria RAM, particiones y procesos${RESET}"
+    echo
+    echo -e "  ${GREEN}7)${RESET} ${BOLD}⚡ Diagnóstico Rápido del Puesto${RESET}"
+    echo -e "     ${CYAN}Chequeo integral exprés de disco, red local, DNS y conectividad${RESET}"
     echo
     echo -e "  ${RED}0)${RESET} ${BOLD}🚪 Salir${RESET}"
     echo -e "${BLUE}======================================================================${RESET}"
-    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-6]: ${RESET}"
+    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-7]: ${RESET}"
     read -r opcion
 
     case "$opcion" in
@@ -75,7 +78,7 @@ while true; do
             bash "$BASE_DIR/submenus/usuarios.sh"
             ;;
         3)
-            bash "$BASE_DIR/submenus/sistema.sh"
+            bash "$BASE_DIR/ReplicacionAula/menu_replicacion.sh"
             ;;
         4)
             bash "$BASE_DIR/submenus/mantenimiento.sh"
@@ -84,6 +87,9 @@ while true; do
             bash "$BASE_DIR/submenus/instalaciones.sh"
             ;;
         6)
+            bash "$BASE_DIR/submenus/sistema.sh"
+            ;;
+        7)
             bash "$BASE_DIR/Red/diagnostico_red.sh"
             ;;
         0)
@@ -93,7 +99,7 @@ while true; do
             ;;
         *)
             echo
-            imprimir_error "Opción no válida. Por favor elija un número del 0 al 6."
+            imprimir_error "Opción no válida. Por favor elija un número del 0 al 7."
             sleep 1.2
             ;;
     esac
