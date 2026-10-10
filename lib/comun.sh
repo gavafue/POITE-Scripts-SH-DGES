@@ -516,3 +516,52 @@ obtener_interfaz_activa() {
     fi
     echo "${iface:-eth0}"
 }
+
+obtener_subred_local() {
+    local iface
+    iface=$(obtener_interfaz_activa)
+    local subred
+    subred=$(ip route show dev "$iface" scope link 2>/dev/null | awk '{print $1}' | head -n1)
+    if [[ -z "$subred" ]]; then
+        local ip
+        ip=$(obtener_ip_local)
+        subred="$(echo "$ip" | cut -d'.' -f1-3).0/24"
+    fi
+    echo "$subred"
+}
+
+validar_formato_hostname() {
+    local h="$1"
+    # RFC 1123: minúsculas, números y guiones, entre 1 y 63 caracteres, sin empezar ni terminar con guión
+    if [[ "$h" =~ ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+resolver_hostname_ip() {
+    local ip="$1"
+    local nombre=""
+
+    # 1. Intentar mDNS con avahi-resolve si está disponible
+    if command -v avahi-resolve >/dev/null 2>&1; then
+        nombre=$(avahi-resolve -a "$ip" 2>/dev/null | awk '{print $2}' | sed 's/\.local$//' || true)
+    fi
+
+    # 2. Intentar getent hosts (/etc/hosts y DNS local)
+    if [[ -z "$nombre" ]] && command -v getent >/dev/null 2>&1; then
+        nombre=$(getent hosts "$ip" 2>/dev/null | awk '{print $2}' || true)
+    fi
+
+    # 3. Intentar consulta inversa con host
+    if [[ -z "$nombre" ]] && command -v host >/dev/null 2>&1; then
+        nombre=$(host "$ip" 2>/dev/null | awk '/pointer/ {print $NF}' | sed 's/\.$//' || true)
+    fi
+
+    # Limpiar sufijo de dominio
+    nombre=$(echo "$nombre" | cut -d'.' -f1)
+
+    echo "${nombre:-desconocido}"
+}
+

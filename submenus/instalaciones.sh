@@ -16,9 +16,10 @@ while true; do
     echo -e "  ${GREEN}3)${RESET}  🦁 Brave Browser (Navegador rápido con bloqueo de anuncios)"
     echo -e "  ${GREEN}4)${RESET}  🍷 WineHQ (Capa de compatibilidad para software Windows)"
     echo -e "  ${GREEN}5)${RESET}  📚 Suite de Software Educativo (Por áreas o completa)"
+    echo -e "  ${GREEN}6)${RESET}  🤖 Ansible (Automatización masiva y gestión centralizada del aula)"
     echo -e "  ${RED}0)${RESET}  🔙 Volver al menú principal"
     echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
-    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-5]: ${RESET}"
+    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-6]: ${RESET}"
     read -r opcion
 
     case "$opcion" in
@@ -27,6 +28,7 @@ while true; do
         3) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_brave.sh" ;;
         4) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_wine.sh" ;;
         5) bash "$BASE_DIR/InstalacionesFrecuentes/suite_educativa.sh" ;;
+        6) bash "$BASE_DIR/InstalacionesFrecuentes/instalar_ansible.sh" ;;
         0) break ;;
         *)
             imprimir_error "Opción no válida."
