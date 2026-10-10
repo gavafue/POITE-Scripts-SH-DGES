@@ -19,10 +19,18 @@ sudo timedatectl set-timezone America/Montevideo
 imprimir_exito "Zona horaria: America/Montevideo (Uruguay GMT-3)"
 
 echo
-echo -e "${CYAN}2. Habilitando sincronización de red NTP en systemd...${RESET}"
+echo -e "${CYAN}2. Habilitando sincronización de red NTP...${RESET}"
 sudo timedatectl set-ntp true 2>/dev/null || true
 
-# Configurar servidores NTP confiables en /etc/systemd/timesyncd.conf si existe
+# Caso 1: chrony (Fedora, RHEL, CentOS, Rocky Linux)
+if command -v chronyc >/dev/null 2>&1 || systemctl list-unit-files 2>/dev/null | grep -q chronyd.service; then
+    echo -e "${CYAN}• Configurando y forzando sincronización con Chrony...${RESET}"
+    sudo systemctl enable --now chronyd 2>/dev/null || true
+    sudo chronyc makestep 2>/dev/null || true
+    imprimir_exito "Servicio Chrony sincronizado."
+fi
+
+# Caso 2: systemd-timesyncd (Debian, Ubuntu, Arch)
 TIMESYNC_CONF="/etc/systemd/timesyncd.conf"
 if [[ -f "$TIMESYNC_CONF" ]]; then
     sudo tee "$TIMESYNC_CONF" > /dev/null <<EOF
@@ -35,7 +43,7 @@ EOF
 fi
 
 echo
-echo -e "${CYAN}3. Sincronizando reloj de hardware con el sistema...${RESET}"
+echo -e "${CYAN}3. Sincronizando reloj de hardware con el sistema (CMOS)...${RESET}"
 sudo hwclock --systohc 2>/dev/null || true
 imprimir_exito "Reloj de hardware (CMOS) sincronizado."
 

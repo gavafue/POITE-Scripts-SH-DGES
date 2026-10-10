@@ -46,22 +46,41 @@ EOF
     modificado=true
 fi
 
-# 2. Soporte para GDM3 (Ubuntu Desktop estándar con GNOME)
-if [[ -f "/etc/gdm3/custom.conf" ]]; then
-    GDM_CONF="/etc/gdm3/custom.conf"
+# 2. Soporte para GDM3 (Ubuntu Desktop con GNOME) y GDM (Fedora / RHEL / Arch)
+for GDM_CONF in "/etc/gdm3/custom.conf" "/etc/gdm/custom.conf"; do
+    if [[ -f "$GDM_CONF" ]]; then
+        if [[ "$nuevo_usuario" == "ninguno" ]]; then
+            sudo sed -i 's/^AutomaticLoginEnable=.*/AutomaticLoginEnable=false/' "$GDM_CONF"
+            imprimir_exito "Autologin deshabilitado en GDM ($GDM_CONF)."
+        else
+            sudo sed -i 's/^#\?AutomaticLoginEnable=.*/AutomaticLoginEnable=true/' "$GDM_CONF"
+            sudo sed -i "s/^#\?AutomaticLogin=.*/AutomaticLogin=$nuevo_usuario/" "$GDM_CONF"
+            imprimir_exito "Configurado autologin para '$nuevo_usuario' en GDM ($GDM_CONF)."
+        fi
+        modificado=true
+    fi
+done
+
+# 3. Soporte para SDDM (KDE Plasma en Fedora, Kubuntu, etc.)
+if [[ -d "/etc/sddm.conf.d" ]] || [[ -f "/etc/sddm.conf" ]]; then
+    sudo mkdir -p /etc/sddm.conf.d
+    SDDM_AUTO="/etc/sddm.conf.d/autologin.conf"
     if [[ "$nuevo_usuario" == "ninguno" ]]; then
-        sudo sed -i 's/^AutomaticLoginEnable=.*/AutomaticLoginEnable=false/' "$GDM_CONF"
-        imprimir_exito "Autologin deshabilitado en GDM3."
+        sudo rm -f "$SDDM_AUTO"
+        imprimir_exito "Autologin deshabilitado en SDDM."
     else
-        sudo sed -i 's/^#\?AutomaticLoginEnable=.*/AutomaticLoginEnable=true/' "$GDM_CONF"
-        sudo sed -i "s/^#\?AutomaticLogin=.*/AutomaticLogin=$nuevo_usuario/" "$GDM_CONF"
-        imprimir_exito "Configurado autologin para '$nuevo_usuario' en GDM3 ($GDM_CONF)."
+        sudo tee "$SDDM_AUTO" > /dev/null <<EOF
+[Autologin]
+User=$nuevo_usuario
+Session=default
+EOF
+        imprimir_exito "Configurado autologin para '$nuevo_usuario' en SDDM ($SDDM_AUTO)."
     fi
     modificado=true
 fi
 
 if [[ "$modificado" = false ]]; then
-    imprimir_aviso "No se detectó un Display Manager estándar (LightDM o GDM3)."
+    imprimir_aviso "No se detectó un Display Manager estándar (LightDM, GDM o SDDM)."
 else
     imprimir_info "Los cambios surtirán efecto en el próximo reinicio del equipo."
 fi

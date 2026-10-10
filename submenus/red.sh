@@ -15,7 +15,7 @@ while true; do
     echo -e "  ${GREEN}2)${RESET}  🛡️  Gestor de Proxy DGES (Configurar, verificar o desactivar)"
     echo -e "  ${GREEN}3)${RESET}  🔄 Reiniciar servicios de red (NetworkManager)"
     echo -e "  ${GREEN}4)${RESET}  ⚡ Diagnóstico rápido de conectividad y DNS"
-    echo -e "  ${GREEN}5)${RESET}  📦 Verificar repositorios oficiales APT de la distribución"
+    echo -e "  ${GREEN}5)${RESET}  📦 Verificar repositorios oficiales de la distribución ($PKG_MANAGER)"
     echo -e "  ${GREEN}6)${RESET}  📤 Distribuir y ejecutar script remoto vía SSH (por IP)"
     echo -e "  ${GREEN}7)${RESET}  🧹 Limpiar archivo de IPs registradas"
     echo -e "  ${GREEN}8)${RESET}  🏷️  Registrar dirección MAC del equipo"

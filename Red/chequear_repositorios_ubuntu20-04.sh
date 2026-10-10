@@ -1,58 +1,87 @@
 #!/bin/bash
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
-# Verificar y restaurar repositorios oficiales APT
+# Verificar y restaurar repositorios oficiales del sistema operativo
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/lib/comun.sh"
 
-imprimir_encabezado "📦 VERIFICAR REPOSITORIOS OFICIALES APT" "Garantiza acceso a paquetes base (main, restricted, universe, multiverse)"
+imprimir_encabezado "📦 VERIFICAR REPOSITORIOS OFICIALES" "Comprueba la integridad de fuentes de software para '$DISTRO_NAME'"
 
-INFO_DISTRO=$(detectar_distro)
-CODENAME=$(echo "$INFO_DISTRO" | cut -d'|' -f3)
-
-# Fallback si no se detecta
-CODENAME="${CODENAME:-focal}"
-
-echo -e "Distribución detectada: ${BOLD}${CYAN}$INFO_DISTRO${RESET}"
-echo -e "Nombre clave de versión: ${BOLD}${GREEN}$CODENAME${RESET}"
+echo -e "Distribución detectada: ${BOLD}${CYAN}$DISTRO_NAME${RESET}"
+echo -e "Familia: ${BOLD}${GREEN}$DISTRO_FAMILY${RESET} | Gestor: ${BOLD}${MAGENTA}$PKG_MANAGER${RESET}"
+echo -e "Codename: ${BOLD}${YELLOW}$DISTRO_CODENAME${RESET}"
 echo
 
 if ! asegurar_root; then
     exit 1
 fi
 
-SOURCES_LIST="/etc/apt/sources.list"
-BACKUP_FILE="/etc/apt/sources.list.bak-$(date +%Y%m%d%H%M%S)"
+case "$DISTRO_FAMILY" in
+    debian)
+        SOURCES_LIST="/etc/apt/sources.list"
+        BACKUP_FILE="/etc/apt/sources.list.bak-$(date +%Y%m%d%H%M%S)"
 
-echo -e "🔒 Creando copia de respaldo en: ${CYAN}$BACKUP_FILE${RESET}"
-sudo cp "$SOURCES_LIST" "$BACKUP_FILE"
+        if [[ -f "$SOURCES_LIST" ]]; then
+            echo -e "🔒 Creando copia de respaldo en: ${CYAN}$BACKUP_FILE${RESET}"
+            sudo cp "$SOURCES_LIST" "$BACKUP_FILE"
 
-REPOS=(
-  "deb http://archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricted universe multiverse"
-  "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-backports main restricted universe multiverse"
-)
+            CODENAME="${DISTRO_CODENAME:-focal}"
+            [[ "$CODENAME" == "rolling" ]] && CODENAME="focal"
+
+            echo
+            echo -e "${BOLD}Comprobando repositorios oficiales para '$CODENAME':${RESET}"
+            REPOS=(
+              "deb http://archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe multiverse"
+              "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe multiverse"
+              "deb http://archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricted universe multiverse"
+            )
+            for repo in "${REPOS[@]}"; do
+                if grep -qE "^\s*deb\s+.*$CODENAME" "$SOURCES_LIST" 2>/dev/null; then
+                    echo -e "✔️ Rama presente: ${CYAN}$repo${RESET}"
+                else
+                    echo -e "➕ Agregando: ${YELLOW}$repo${RESET}"
+                    echo "$repo" | sudo tee -a "$SOURCES_LIST" > /dev/null
+                fi
+            done
+        else
+            imprimir_info "Sistema Debian/Ubuntu utilizando formato moderno deb822 en /etc/apt/sources.list.d/."
+        fi
+        ;;
+
+    redhat)
+        echo -e "${BOLD}Comprobando repositorios activos en DNF/YUM:${RESET}"
+        sudo "$PKG_MANAGER" repolist
+        echo
+        imprimir_exito "Repositorios de la familia Red Hat / Fedora verificados."
+        ;;
+
+    arch)
+        echo -e "${BOLD}Comprobando configuración de repositorios en Pacman:${RESET}"
+        grep -E "^\[(core|extra|multilib)\]" /etc/pacman.conf 2>/dev/null || true
+        echo
+        imprimir_exito "Configuración de repositorios de Arch Linux verificada."
+        ;;
+
+    suse)
+        echo -e "${BOLD}Comprobando repositorios en Zypper:${RESET}"
+        sudo zypper lr
+        echo
+        imprimir_exito "Repositorios de openSUSE verificados."
+        ;;
+
+    *)
+        imprimir_aviso "Distribución genérica: no se dispone de plantilla específica."
+        ;;
+esac
 
 echo
-echo -e "${BOLD}Comprobando repositorios oficiales para '$CODENAME':${RESET}"
-for repo in "${REPOS[@]}"; do
-    if grep -qE "^\s*deb\s+.*$CODENAME" "$SOURCES_LIST" 2>/dev/null; then
-        echo -e "✔️ Rama presente: ${CYAN}$repo${RESET}"
-    else
-        echo -e "➕ Agregando: ${YELLOW}$repo${RESET}"
-        echo "$repo" | sudo tee -a "$SOURCES_LIST" > /dev/null
-    fi
-done
-
-echo
-echo -e "${YELLOW}¿Desea actualizar la lista de paquetes ahora (apt update)? (S/n): ${RESET}"
+echo -e "${YELLOW}¿Desea actualizar los índices de paquetes ahora? (S/n): ${RESET}"
 read -r resp
 if [[ -z "$resp" || "$resp" =~ ^[sS]$ ]]; then
-    sudo apt update
+    actualizar_repositorios
 fi
 
 imprimir_exito "Verificación de repositorios completada."

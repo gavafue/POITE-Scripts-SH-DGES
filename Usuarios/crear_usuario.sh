@@ -30,17 +30,32 @@ if id "$user" &>/dev/null; then
 fi
 
 echo
-echo -e "${YELLOW}¿El usuario debe tener permisos de administrador (sudo)?${RESET}"
+echo -e "${YELLOW}¿El usuario debe tener permisos de administrador ($GRUPO_ADMIN)?${RESET}"
 echo "  [s] Sí (para docentes / administradores)"
 echo "  [n] No (recomendado para estudiantes / invitados)"
 read -p "Seleccione [s/N]: " es_admin
 
-if sudo adduser --gecos "" "$user"; then
+creado=false
+
+if [[ "$DISTRO_FAMILY" == "debian" ]] && command -v adduser >/dev/null 2>&1; then
+    if sudo adduser --gecos "" "$user"; then
+        creado=true
+    fi
+else
+    # Red Hat / Fedora / Arch / SUSE (usar useradd estándar)
+    if sudo useradd -m -s /bin/bash "$user"; then
+        echo -e "${CYAN}Establezca la contraseña para el usuario '$user':${RESET}"
+        sudo passwd "$user"
+        creado=true
+    fi
+fi
+
+if [[ "$creado" = true ]]; then
     if [[ "$es_admin" =~ ^[sS]$ ]]; then
-        sudo usermod -aG sudo "$user" 2>/dev/null || sudo usermod -aG wheel "$user" 2>/dev/null
-        imprimir_exito "Usuario '$user' creado CON permisos de administrador (sudo)."
+        sudo usermod -aG "$GRUPO_ADMIN" "$user"
+        imprimir_exito "Usuario '$user' creado CON permisos de administrador (grupo $GRUPO_ADMIN)."
     else
-        imprimir_exito "Usuario estándar '$user' creado (sin privilegios de root)."
+        imprimir_exito "Usuario estándar '$user' creado (sin privilegios de administrador)."
     fi
 else
     imprimir_error "Ocurrió un error al crear el usuario '$user'."

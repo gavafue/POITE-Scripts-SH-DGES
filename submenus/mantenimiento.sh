@@ -9,11 +9,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$SCRIPT_DIR/lib/comun.sh"
 
 while true; do
-    imprimir_encabezado "🧹 MANTENIMIENTO PREVENTIVO Y CORRECTIVO" "Tareas esenciales para optimizar y reparar equipos escolares"
+    imprimir_encabezado "🧹 MANTENIMIENTO PREVENTIVO Y CORRECTIVO" "Tareas esenciales para optimizar y reparar equipos escolares ($DISTRO_FAMILY)"
 
     echo -e "  ${GREEN}1)${RESET}  🕒 Sincronizar reloj de sistema y hardware (Solución pila BIOS/SSL)"
-    echo -e "  ${GREEN}2)${RESET}  🧱 Reparar dependencias APT y paquetes bloqueados (dpkg/apt)"
-    echo -e "  ${GREEN}3)${RESET}  🧹 Limpieza profunda de almacenamiento (Cachés, logs y temporales)"
+    echo -e "  ${GREEN}2)${RESET}  🧱 Reparar dependencias y paquetes bloqueados ($PKG_MANAGER)"
+    echo -e "  ${GREEN}3)${RESET}  🧹 Limpieza profunda de almacenamiento ($PKG_MANAGER, cachés y logs)"
     echo -e "  ${GREEN}4)${RESET}  🔐 Instalar y activar servidor SSH (OpenSSH Server)"
     echo -e "  ${RED}0)${RESET}  🔙 Volver al menú principal"
     echo -e "${BLUE}----------------------------------------------------------------------${RESET}"

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
-# Instalador de Suite de Software Educativo para Laboratorios de Informática
+# Instalador de Suite de Software Educativo multi-distribución
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -14,30 +14,55 @@ if ! asegurar_root; then
     exit 1
 fi
 
+mapear_paquete_distro() {
+    local pkg="$1"
+    case "$pkg" in
+        libreoffice-l10n-es)
+            case "$DISTRO_FAMILY" in
+                redhat) echo "libreoffice-langpack-es" ;;
+                arch)   echo "libreoffice-fresh-es" ;;
+                *)      echo "libreoffice-l10n-es" ;;
+            esac
+            ;;
+        gufw)
+            case "$DISTRO_FAMILY" in
+                redhat) echo "firewalld" ;;
+                *)      echo "gufw" ;;
+            esac
+            ;;
+        *)
+            echo "$pkg"
+            ;;
+    esac
+}
+
 instalar_lista() {
     local nombre_categoria="$1"
     shift
     local paquetes=("$@")
 
-    echo -e "${BOLD}${CYAN}Instalando categoría: $nombre_categoria...${RESET}"
+    echo -e "${BOLD}${CYAN}Instalando categoría: $nombre_categoria (${PKG_MANAGER})...${RESET}"
     echo "----------------------------------------------------------------------"
-    
+
     local para_instalar=()
     for pkg in "${paquetes[@]}"; do
-        if dpkg -s "$pkg" &>/dev/null; then
-            echo -e "✔️ Ya instalado: ${GREEN}$pkg${RESET}"
-        elif apt-cache show "$pkg" &>/dev/null; then
-            para_instalar+=("$pkg")
+        local pkg_real
+        pkg_real=$(mapear_paquete_distro "$pkg")
+
+        if paquete_instalado "$pkg_real"; then
+            echo -e "✔️ Ya instalado: ${GREEN}$pkg_real${RESET}"
+        elif paquete_disponible "$pkg_real"; then
+            para_instalar+=("$pkg_real")
         else
-            echo -e "⚠️  No disponible en repositorios: ${YELLOW}$pkg${RESET}"
+            echo -e "⚠️  No disponible en repositorios oficiales: ${YELLOW}$pkg_real${RESET}"
         fi
     done
 
     if [ ${#para_instalar[@]} -gt 0 ]; then
         echo -e "${YELLOW}Instalando paquetes pendientes: ${para_instalar[*]}...${RESET}"
-        sudo apt-get install -y "${para_instalar[@]}" || true
+        instalar_paquetes "${para_instalar[@]}" || true
     else
-        imprimir_exito "Todos los paquetes de esta categoría ya están al día."
+        imprimir_exito "Todos los paquetes disponibles de esta categoría ya están al día."
     fi
     echo
 }
@@ -47,6 +72,8 @@ PKGS_DEV=(thonny geany kate scratch)
 PKGS_CIENCIAS=(gcompris-qt kalzium kstars stellarium tuxmath tuxtype)
 PKGS_DISENO=(gimp inkscape krita tuxpaint audacity obs-studio kdenlive)
 
+echo -e "Distribución detectada: ${BOLD}${CYAN}${DISTRO_NAME}${RESET} (${DISTRO_FAMILY} / ${PKG_MANAGER})"
+echo
 echo -e "Seleccione qué componentes desea instalar en este equipo:"
 echo -e "  ${GREEN}1)${RESET} 🌟 ${BOLD}Suite Educativa COMPLETA${RESET} (Todas las aplicaciones escolares)"
 echo -e "  ${GREEN}2)${RESET} 📝 Ofimática, Visores y Utilidades (LibreOffice, PDF, VLC, Seguridad)"
@@ -60,7 +87,7 @@ read -r opcion
 
 case "$opcion" in
     1)
-        sudo apt-get update -y
+        actualizar_repositorios
         instalar_lista "Ofimática y Utilidades" "${PKGS_OFIMATICA[@]}"
         instalar_lista "Programación y Robótica" "${PKGS_DEV[@]}"
         instalar_lista "Ciencias y Matemáticas" "${PKGS_CIENCIAS[@]}"
@@ -68,19 +95,19 @@ case "$opcion" in
         imprimir_exito "Instalación de la Suite Educativa Completa finalizada."
         ;;
     2)
-        sudo apt-get update -y
+        actualizar_repositorios
         instalar_lista "Ofimática y Utilidades" "${PKGS_OFIMATICA[@]}"
         ;;
     3)
-        sudo apt-get update -y
+        actualizar_repositorios
         instalar_lista "Programación y Robótica" "${PKGS_DEV[@]}"
         ;;
     4)
-        sudo apt-get update -y
+        actualizar_repositorios
         instalar_lista "Ciencias y Matemáticas" "${PKGS_CIENCIAS[@]}"
         ;;
     5)
-        sudo apt-get update -y
+        actualizar_repositorios
         instalar_lista "Arte y Multimedia" "${PKGS_DISENO[@]}"
         ;;
     0)

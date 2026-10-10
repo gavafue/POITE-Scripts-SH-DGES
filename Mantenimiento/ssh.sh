@@ -14,21 +14,30 @@ if ! asegurar_root; then
     exit 1
 fi
 
-echo -e "${CYAN}Instalando y activando servicio OpenSSH...${RESET}"
-sudo apt update && sudo apt install -y openssh-server
+SERVICIO_SSH=$(servicio_nombre "ssh")
 
-sudo systemctl enable ssh
-sudo systemctl restart ssh
+echo -e "${CYAN}Detectando paquetes para la familia '${DISTRO_FAMILY}'...${RESET}"
+PAQUETE_SSH="openssh-server"
+if [[ "$DISTRO_FAMILY" == "arch" || "$DISTRO_FAMILY" == "suse" ]]; then
+    PAQUETE_SSH="openssh"
+fi
 
-if systemctl is-active --quiet ssh; then
+echo -e "${CYAN}Instalando y activando servicio OpenSSH ($PAQUETE_SSH)...${RESET}"
+actualizar_repositorios
+instalar_paquetes "$PAQUETE_SSH"
+
+sudo systemctl enable "$SERVICIO_SSH" 2>/dev/null || true
+sudo systemctl restart "$SERVICIO_SSH" 2>/dev/null || true
+
+if systemctl is-active --quiet "$SERVICIO_SSH"; then
     IP_ACTUAL=$(obtener_ip_local)
     USUARIO_ACTUAL=$(whoami)
-    imprimir_exito "Servidor SSH activo y escuchando en el puerto 22."
+    imprimir_exito "Servidor SSH activo y escuchando en el puerto 22 (servicio: $SERVICIO_SSH)."
     echo
     echo -e "${BOLD}Para conectarse desde otra máquina del aula ejecute:${RESET}"
     echo -e "  ${GREEN}ssh ${USUARIO_ACTUAL}@${IP_ACTUAL}${RESET}"
 else
-    imprimir_error "No se pudo iniciar el servicio SSH."
+    imprimir_error "No se pudo iniciar el servicio SSH ($SERVICIO_SSH)."
 fi
 
 pausar

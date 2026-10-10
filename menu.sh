@@ -5,9 +5,15 @@
 # Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
-# Resolver ruta base absoluta del script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export BASE_DIR="$SCRIPT_DIR"
+# Resolver ruta base canónica del script (soporta invocación vía symlink)
+_FUENTE_CANONICA="${BASH_SOURCE[0]}"
+while [[ -h "$_FUENTE_CANONICA" ]]; do
+    _DIR_TEMP="$(cd -P "$(dirname "$_FUENTE_CANONICA")" && pwd)"
+    _FUENTE_CANONICA="$(readlink "$_FUENTE_CANONICA")"
+    [[ "$_FUENTE_CANONICA" != /* ]] && _FUENTE_CANONICA="$_DIR_TEMP/$_FUENTE_CANONICA"
+done
+BASE_DIR="$(cd -P "$(dirname "$_FUENTE_CANONICA")" && pwd)"
+export BASE_DIR
 
 # Cargar librería común
 if [[ -f "$BASE_DIR/lib/comun.sh" ]]; then
@@ -25,9 +31,6 @@ trap 'echo -e "\n${RED}Interrupción detectada. Saliendo...${RESET}"; exit 0' IN
 while true; do
     # Obtener métricas rápidas del sistema para el encabezado en vivo
     IP_LOCAL=$(obtener_ip_local)
-    INFO_DISTRO=$(detectar_distro)
-    NOMBRE_DISTRO=$(echo "$INFO_DISTRO" | cut -d'|' -f1)
-    VER_DISTRO=$(echo "$INFO_DISTRO" | cut -d'|' -f2)
     HOSTNAME_ACTUAL=$(hostname 2>/dev/null || echo "localhost")
     USUARIO_ACTUAL=$(whoami 2>/dev/null || echo "usuario")
 
@@ -36,8 +39,8 @@ while true; do
     echo -e "${BOLD}${CYAN}   🖥️  ASISTENTE POITE · DGES / URUGUAY${RESET}"
     echo -e "   ${YELLOW}Prof. Gabriel Vázquez · Gestión de Laboratorios de Informática${RESET}"
     echo -e "${BLUE}======================================================================${RESET}"
-    echo -e "   ${BOLD}💻 Equipo:${RESET} ${GREEN}${HOSTNAME_ACTUAL}${RESET}   |   ${BOLD}👤 Usuario:${RESET} ${MAGENTA}${USUARIO_ACTUAL}${RESET}"
-    echo -e "   ${BOLD}🌐 IP:${RESET}     ${YELLOW}${IP_LOCAL}${RESET}      |   ${BOLD}🐧 Sistema:${RESET} ${CYAN}${NOMBRE_DISTRO} ${VER_DISTRO}${RESET}"
+    echo -e "   ${BOLD}💻 Equipo:${RESET}  ${GREEN}${HOSTNAME_ACTUAL}${RESET}   |   ${BOLD}👤 Usuario:${RESET} ${MAGENTA}${USUARIO_ACTUAL}${RESET}"
+    echo -e "   ${BOLD}🌐 IP:${RESET}      ${YELLOW}${IP_LOCAL}${RESET}      |   ${BOLD}🐧 Sistema:${RESET} ${CYAN}${DISTRO_NAME} [${PKG_MANAGER}]${RESET}"
     echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
     echo -e "${BOLD}${MAGENTA}Seleccione una categoría de administración:${RESET}"
     echo
@@ -51,13 +54,13 @@ while true; do
     echo -e "     ${CYAN}Auditoría de hardware, CPU, memoria RAM, particiones y procesos${RESET}"
     echo
     echo -e "  ${GREEN}4)${RESET} ${BOLD}🧹 Mantenimiento del Sistema${RESET}"
-    echo -e "     ${CYAN}Reparación APT, sincronización de reloj NTP/BIOS y limpieza profunda${RESET}"
+    echo -e "     ${CYAN}Reparación $PKG_MANAGER, sincronización de reloj NTP/BIOS y limpieza profunda${RESET}"
     echo
     echo -e "  ${GREEN}5)${RESET} ${BOLD}🧩 Instalaciones Frecuentes${RESET}"
     echo -e "     ${CYAN}Visual Studio Code, navegadores web, Wine y Suite Educativa completa${RESET}"
     echo
     echo -e "  ${GREEN}6)${RESET} ${BOLD}⚡ Diagnóstico Rápido del Laboratorio${RESET}"
-    echo -e "     ${CYAN}Chequeo integral exprés de disco, red, DNS y repositorios${RESET}"
+    echo -e "     ${CYAN}Chequeo integral exprés de disco, red, DNS y conectividad${RESET}"
     echo
     echo -e "  ${RED}0)${RESET} ${BOLD}🚪 Salir${RESET}"
     echo -e "${BLUE}======================================================================${RESET}"

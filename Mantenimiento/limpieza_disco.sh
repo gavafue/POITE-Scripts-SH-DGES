@@ -17,10 +17,8 @@ if ! asegurar_root; then
     exit 1
 fi
 
-echo -e "${CYAN}1. Limpiando caché de paquetes APT descargados...${RESET}"
-sudo apt-get clean
-sudo apt-get autoclean
-sudo apt-get autoremove --purge -y
+echo -e "${CYAN}1. Limpiando caché y paquetes obsoletos ($PKG_MANAGER)...${RESET}"
+limpiar_paquetes
 
 echo
 echo -e "${CYAN}2. Reduciendo tamaño de registros del sistema (journalctl)...${RESET}"
@@ -32,6 +30,7 @@ echo -e "${CYAN}3. Limpiando miniaturas (thumbnails) y cachés temporales de usu
 rm -rf /home/*/.cache/thumbnails/* 2>/dev/null || true
 rm -rf ~/.cache/thumbnails/* 2>/dev/null || true
 sudo rm -rf /var/crash/* 2>/dev/null || true
+sudo rm -rf /var/tmp/* 2>/dev/null || true
 
 echo
 imprimir_exito "Limpieza profunda finalizada con éxito."
