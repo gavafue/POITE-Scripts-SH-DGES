@@ -1,0 +1,10 @@
+---
+- name: Apagar todas las PCs del laboratorio al finalizar el turno
+  hosts: laboratorio
+  become: true
+  tasks:
+    - name: Enviar orden de apagado inmediato
+      ansible.builtin.command: shutdown -h now
+      async: 1
+      poll: 0
+      ignore_errors: true

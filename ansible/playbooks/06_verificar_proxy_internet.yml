@@ -1,0 +1,20 @@
+---
+- name: Verificar salida a Internet y Proxy DGES en todas las PCs del aula
+  hosts: laboratorio
+  gather_facts: false
+  tasks:
+    - name: Probar conexión HTTP a portal educativo vía proxy institucional
+      ansible.builtin.command: curl -s -I --connect-timeout 5 --proxy http://10.4.142.24:8080 https://uruguayeduca.anep.edu.uy
+      register: test_proxy
+      changed_when: false
+      failed_when: false
+
+    - name: Resultado exitoso
+      ansible.builtin.debug:
+        msg: "✅ {{ inventory_hostname }}: Proxy e Internet funcionando correctamente."
+      when: test_proxy.rc == 0
+
+    - name: Alerta de falla de proxy
+      ansible.builtin.debug:
+        msg: "❌ {{ inventory_hostname }}: NO responde a través del proxy 10.4.142.24:8080."
+      when: test_proxy.rc != 0

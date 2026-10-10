@@ -1,0 +1,8 @@
+---
+- name: Enviar notificación a terminales o escritorios de estudiantes
+  hosts: laboratorio
+  become: false
+  tasks:
+    - name: Emitir mensaje de pared (wall) a todas las terminales
+      ansible.builtin.command: "wall '📢 AVISO DEL DOCENTE: {{ mensaje | default('Por favor guarden su trabajo y presten atención al frente.') }}'"
+      changed_when: false

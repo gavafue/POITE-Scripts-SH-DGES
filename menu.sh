@@ -34,6 +34,13 @@ while true; do
     HOSTNAME_ACTUAL=$(hostname 2>/dev/null || echo "localhost")
     USUARIO_ACTUAL=$(whoami 2>/dev/null || echo "usuario")
 
+    # Detección rápida de estado del proxy
+    if [[ -f "/etc/apt/apt.conf.d/99proxy-dges.conf" ]] || [[ -f "/etc/profile.d/proxy-dges.sh" ]] || grep -qi "http_proxy=" /etc/environment 2>/dev/null; then
+        ESTADO_PROXY="${GREEN}ACTIVO${RESET}"
+    else
+        ESTADO_PROXY="${GRAY}Directo (Sin proxy)${RESET}"
+    fi
+
     clear
     echo -e "${BLUE}======================================================================${RESET}"
     echo -e "${BOLD}${CYAN}   🖥️  ASISTENTE POITE · DGES / URUGUAY${RESET}"
@@ -41,56 +48,61 @@ while true; do
     echo -e "${BLUE}======================================================================${RESET}"
     echo -e "   ${BOLD}💻 Equipo:${RESET}  ${GREEN}${HOSTNAME_ACTUAL}${RESET}   |   ${BOLD}👤 Usuario:${RESET} ${MAGENTA}${USUARIO_ACTUAL}${RESET}"
     echo -e "   ${BOLD}🌐 IP:${RESET}      ${YELLOW}${IP_LOCAL}${RESET}      |   ${BOLD}🐧 Sistema:${RESET} ${CYAN}${DISTRO_NAME} [${PKG_MANAGER}]${RESET}"
+    echo -e "   ${BOLD}🛡️  Proxy:${RESET}   ${ESTADO_PROXY}"
     echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
-    echo -e "${BOLD}${MAGENTA}Seleccione una categoría de administración:${RESET}"
+    echo -e "${BOLD}${MAGENTA}⚡ FLUJO DE INICIO DE AÑO Y CLONACIÓN (CLONEZILLA & ANSIBLE):${RESET}"
     echo
-    echo -e "  ${GREEN}1)${RESET} ${BOLD}🌐 Red y Conectividad${RESET}"
-    echo -e "     ${CYAN}Mapeo lab1-pcXX, Proxy DGES, despliegue SSH, Ansible y control remoto${RESET}"
+    echo -e "  ${GREEN}1)${RESET} ${BOLD}🛡️  Paso 1: Proxy Institucional DGES${RESET} ${CYAN}(Habilitar Internet en el Aula)${RESET}"
+    echo -e "     ${GRAY}APT, DNF, /etc/environment, sudoers, wgetrc y test de conectividad${RESET}"
     echo
-    echo -e "  ${GREEN}2)${RESET} ${BOLD}👥 Usuarios y Cuentas${RESET}"
-    echo -e "     ${CYAN}Creación individual/lotes, autologin de aula, claves y permisos${RESET}"
+    echo -e "  ${GREEN}2)${RESET} ${BOLD}📦 Paso 2: Preparación de Imagen Maestra${RESET} ${CYAN}(VirtualBox / Clonezilla)${RESET}"
+    echo -e "     ${GRAY}Acondicionar VM, alumno, autologin, SSH, software y sellado Sysprep${RESET}"
     echo
-    echo -e "  ${GREEN}3)${RESET} ${BOLD}🚀 Replicación de Laboratorio (Sin Clonar Discos)${RESET}"
-    echo -e "     ${CYAN}Capturar PC Maestra y desplegar configuración completa a PCs limpias${RESET}"
+    echo -e "  ${GREEN}3)${RESET} ${BOLD}🚀 Paso 3: Post-Clonación Día 1${RESET} ${CYAN}(Hostnames lab1-pcXX y Ansible)${RESET}"
+    echo -e "     ${GRAY}Mapear aula, asignar nombres secuenciales y control masivo de clase${RESET}"
     echo
-    echo -e "  ${GREEN}4)${RESET} ${BOLD}🧹 Mantenimiento del Sistema${RESET}"
-    echo -e "     ${CYAN}Reparación $PKG_MANAGER, repositorios, sincronización horaria y limpieza${RESET}"
+    echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
+    echo -e "${BOLD}${MAGENTA}🛠️  ADMINISTRACIÓN Y GESTIÓN DIARIA DEL LABORATORIO:${RESET}"
     echo
-    echo -e "  ${GREEN}5)${RESET} ${BOLD}🧩 Instalaciones Frecuentes${RESET}"
-    echo -e "     ${CYAN}Visual Studio Code, navegadores web, Wine, Ansible y Suite Educativa${RESET}"
-    echo
-    echo -e "  ${GREEN}6)${RESET} ${BOLD}💻 Información del Sistema${RESET}"
-    echo -e "     ${CYAN}Auditoría de hardware, CPU, memoria RAM, particiones y procesos${RESET}"
-    echo
-    echo -e "  ${GREEN}7)${RESET} ${BOLD}⚡ Diagnóstico Rápido del Puesto${RESET}"
-    echo -e "     ${CYAN}Chequeo integral exprés de disco, red local, DNS y conectividad${RESET}"
+    echo -e "  ${GREEN}4)${RESET} 🌐 Red y Conectividad (Diagnóstico, Mapeo, SSH y Control Remoto)"
+    echo -e "  ${GREEN}5)${RESET} 👥 Usuarios y Cuentas (Alumno, Autologin, Cargas CSV y Claves)"
+    echo -e "  ${GREEN}6)${RESET} 🧹 Mantenimiento del Sistema (Paquetes $PKG_MANAGER, Reloj BIOS, Limpieza)"
+    echo -e "  ${GREEN}7)${RESET} 🧩 Instalaciones Frecuentes (VS Code, Chrome, Wine, Suite Educativa)"
+    echo -e "  ${GREEN}8)${RESET} 🔄 Replicación Remota Alternativa (Configuración sin clonar discos)"
+    echo -e "  ${GREEN}9)${RESET} 💻 Información del Sistema y Auditoría de Hardware"
     echo
     echo -e "  ${RED}0)${RESET} ${BOLD}🚪 Salir${RESET}"
     echo -e "${BLUE}======================================================================${RESET}"
-    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-7]: ${RESET}"
+    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-9]: ${RESET}"
     read -r opcion
 
     case "$opcion" in
         1)
-            bash "$BASE_DIR/submenus/red.sh"
+            bash "$BASE_DIR/Red/proxy_DGES.sh"
             ;;
         2)
-            bash "$BASE_DIR/submenus/usuarios.sh"
+            bash "$BASE_DIR/ImagenMaestra/menu_imagen_maestra.sh"
             ;;
         3)
-            bash "$BASE_DIR/ReplicacionAula/menu_replicacion.sh"
+            bash "$BASE_DIR/PostClonacion/menu_post_clonacion.sh"
             ;;
         4)
-            bash "$BASE_DIR/submenus/mantenimiento.sh"
+            bash "$BASE_DIR/submenus/red.sh"
             ;;
         5)
-            bash "$BASE_DIR/submenus/instalaciones.sh"
+            bash "$BASE_DIR/submenus/usuarios.sh"
             ;;
         6)
-            bash "$BASE_DIR/submenus/sistema.sh"
+            bash "$BASE_DIR/submenus/mantenimiento.sh"
             ;;
         7)
-            bash "$BASE_DIR/Red/diagnostico_red.sh"
+            bash "$BASE_DIR/submenus/instalaciones.sh"
+            ;;
+        8)
+            bash "$BASE_DIR/ReplicacionAula/menu_replicacion.sh"
+            ;;
+        9)
+            bash "$BASE_DIR/submenus/sistema.sh"
             ;;
         0)
             echo
@@ -99,7 +111,7 @@ while true; do
             ;;
         *)
             echo
-            imprimir_error "Opción no válida. Por favor elija un número del 0 al 7."
+            imprimir_error "Opción no válida. Por favor elija un número del 0 al 9."
             sleep 1.2
             ;;
     esac

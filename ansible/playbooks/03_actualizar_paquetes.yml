@@ -1,0 +1,16 @@
+---
+- name: Actualizar paquetes en todas las PCs del laboratorio
+  hosts: laboratorio
+  become: true
+  tasks:
+    - name: Actualizar repositorios y paquetes (Debian/Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Actualizar paquetes (RedHat/Fedora)
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == 'RedHat'

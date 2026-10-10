@@ -44,21 +44,29 @@ echo
 echo -e "Seleccione qué acción masiva desea ejecutar en el laboratorio:"
 echo -e "  ${GREEN}1)${RESET} 📡 Probar conectividad (Ping Ansible a todas las PCs)"
 echo -e "  ${GREEN}2)${RESET} 🕒 Sincronizar reloj y zona horaria (Montevideo) en todo el aula"
-echo -e "  ${GREEN}3)${RESET} 📦 Actualizar repositorios y paquetes de software en lote"
-echo -e "  ${GREEN}4)${RESET} 👤 Crear usuario estándar 'alumno' en todas las computadoras"
-echo -e "  ${GREEN}5)${RESET} 🔌 Apagar todas las PCs del aula al finalizar la jornada"
-echo -e "  ${GREEN}6)${RESET} ⌨️  Ejecutar comando ad-hoc en todo el laboratorio"
+echo -e "  ${GREEN}3)${RESET} 🛡️  Verificar salida a Internet y Proxy DGES en todas las PCs"
+echo -e "  ${GREEN}4)${RESET} 📦 Actualizar repositorios y paquetes de software en lote"
+echo -e "  ${GREEN}5)${RESET} 👤 Crear o asegurar usuario estándar 'alumno' en todas las PCs"
+echo -e "  ${GREEN}6)${RESET} 📢 Enviar mensaje o notificación a las pantallas de los estudiantes"
+echo -e "  ${GREEN}7)${RESET} 🔄 Reiniciar todas las PCs del laboratorio"
+echo -e "  ${YELLOW}8)${RESET} 🔌 Apagar todas las PCs del aula al finalizar la jornada"
+echo -e "  ${CYAN}9)${RESET} ⌨️  Ejecutar comando ad-hoc en todo el laboratorio"
 echo -e "  ${RED}0)${RESET} 🔙 Cancelar y volver"
 echo
-echo -ne "${BOLD}Seleccione una opción [0-6]: ${RESET}"
+echo -ne "${BOLD}Seleccione una opción [0-9]: ${RESET}"
 read -r opt_ans
 
 ejecutar_playbook() {
     local pb="$1"
+    local extra_vars="${2:-}"
     echo
     echo -e "${CYAN}Ejecutando playbook: $pb...${RESET}"
     echo "----------------------------------------------------------------------"
-    ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/$pb"
+    if [[ -n "$extra_vars" ]]; then
+        ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/$pb" -e "$extra_vars"
+    else
+        ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/$pb"
+    fi
     echo "----------------------------------------------------------------------"
 }
 
@@ -70,12 +78,33 @@ case "$opt_ans" in
         ejecutar_playbook "02_sincronizar_reloj.yml"
         ;;
     3)
-        ejecutar_playbook "03_actualizar_paquetes.yml"
+        ejecutar_playbook "06_verificar_proxy_internet.yml"
         ;;
     4)
-        ejecutar_playbook "04_crear_usuario_alumno.yml"
+        ejecutar_playbook "03_actualizar_paquetes.yml"
         ;;
     5)
+        ejecutar_playbook "04_crear_usuario_alumno.yml"
+        ;;
+    6)
+        echo
+        echo -ne "${CYAN}Ingrese el mensaje a transmitir al aula: ${RESET}"
+        read -r msg_in
+        if [[ -n "$msg_in" ]]; then
+            ejecutar_playbook "08_notificar_alumnos.yml" "mensaje=$msg_in"
+        fi
+        ;;
+    7)
+        echo -e "${YELLOW}⚠️  ATENCIÓN: Esto reiniciará todas las computadoras del laboratorio.${RESET}"
+        echo -ne "¿Está seguro de continuar? (s/N): "
+        read -r conf_reb
+        if [[ "$conf_reb" =~ ^[sS]$ ]]; then
+            ejecutar_playbook "07_reiniciar_aula.yml"
+        else
+            imprimir_info "Operación cancelada."
+        fi
+        ;;
+    8)
         echo -e "${RED}⚠️  ATENCIÓN: Esto enviará la orden de apagado inmediato a todos los equipos del laboratorio.${RESET}"
         echo -ne "¿Está seguro de continuar? (s/N): "
         read -r conf_apagar
@@ -85,7 +114,7 @@ case "$opt_ans" in
             imprimir_info "Operación cancelada."
         fi
         ;;
-    6)
+    9)
         echo
         echo -ne "${CYAN}Ingrese el comando a ejecutar en todas las PCs (ej: uptime / free -m): ${RESET}"
         read -r cmd_adhoc

@@ -1,0 +1,7 @@
+---
+- name: Probar conectividad con todas las máquinas del aula
+  hosts: laboratorio
+  gather_facts: false
+  tasks:
+    - name: Ping de conectividad a los equipos
+      ansible.builtin.ping:

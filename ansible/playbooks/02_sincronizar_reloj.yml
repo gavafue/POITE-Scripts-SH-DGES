@@ -1,0 +1,16 @@
+---
+- name: Sincronizar zona horaria y reloj en todo el laboratorio
+  hosts: laboratorio
+  become: true
+  tasks:
+    - name: Configurar zona horaria a America/Montevideo
+      ansible.builtin.timezone:
+        name: America/Montevideo
+
+    - name: Habilitar sincronización NTP con timedatectl
+      ansible.builtin.command: timedatectl set-ntp true
+      changed_when: false
+
+    - name: Sincronizar reloj de hardware con el sistema
+      ansible.builtin.command: hwclock --systohc
+      changed_when: false

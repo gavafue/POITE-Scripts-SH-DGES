@@ -1,0 +1,11 @@
+---
+- name: Asegurar cuenta común de estudiante en el aula
+  hosts: laboratorio
+  become: true
+  tasks:
+    - name: Crear usuario alumno con shell bash
+      ansible.builtin.user:
+        name: alumno
+        comment: "Estudiante de Informática"
+        shell: /bin/bash
+        state: present
