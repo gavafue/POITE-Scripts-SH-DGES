@@ -36,6 +36,13 @@ if systemctl is-active --quiet "$SERVICIO_SSH"; then
     echo
     echo -e "${BOLD}Para conectarse desde otra máquina del aula ejecute:${RESET}"
     echo -e "  ${GREEN}ssh ${USUARIO_ACTUAL}@${IP_ACTUAL}${RESET}"
+    echo
+    echo -e "${YELLOW}¿Desea desplegar o aprovisionar SSH en las demás computadoras del aula? (s/N): ${RESET}"
+    read -r resp_despliegue
+    if [[ "$resp_despliegue" =~ ^[sS]$ ]]; then
+        bash "$BASE_DIR/Red/despliegue_ssh_aula.sh"
+        exit 0
+    fi
 else
     imprimir_error "No se pudo iniciar el servicio SSH ($SERVICIO_SSH)."
 fi

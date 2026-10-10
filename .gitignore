@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary / editor files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+!RegistrarIP/registro_ejecuciones.log

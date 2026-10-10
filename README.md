@@ -18,9 +18,10 @@ En el trabajo diario de los **laboratorios de informática liceales** y aulas te
 
 * Computadoras que pierden la hora por **baterías CMOS de la BIOS agotadas**, impidiendo la navegación HTTPS por errores de certificados SSL.
 * Equipos que requieren configuración de **Proxy institucional de DGES** para actualizar paquetes o acceder a repositorios oficiales.
+* **Aprovisionamiento express de SSH:** Habilitar acceso remoto en computadoras recién instaladas o clonadas sin necesidad de sentarse a escribir comandos manuales en cada una.
 * **Mapeo del aula y detección de equipos:** Identificar rápidamente todas las computadoras activas en la subred escolar según su convención de nombre (ej: `lab1-pc01`, `lab1-pc02`, `lab2-pc15`).
 * **Asignación y estandarización de Hostnames:** Nombrar computadoras de forma individual o en lote secuencial para que cada máquina refleje su puesto físico en el aula.
-* **Automatización con Ansible:** Ejecutar tareas masivas (probar conectividad, sincronizar reloj, actualizar paquetes, crear cuentas de estudiantes o apagar todas las máquinas al finalizar el turno) en segundos.
+* **Automatización masiva con Ansible:** Ejecutar tareas simultáneas (probar conectividad, sincronizar reloj, actualizar paquetes, crear cuentas de estudiantes o apagar todas las máquinas al finalizar el turno) en segundos.
 * Creación manual o por lotes de **cuentas de estudiantes** con permisos controlados (evitando privilegios innecesarios de `sudo`).
 * Instalación de programas pedagógicos esenciales y suites ofimáticas sin lidiar con comandos complejos en terminal.
 
@@ -59,7 +60,8 @@ POITE-Scripts-SH-DGES/
 ├── menu.sh                         # 🖥️ Menú principal interactivo con métricas en vivo y detección de distro
 ├── instalar_comando.sh             # 🚀 Enlace y lanzador global /usr/local/bin/poite
 ├── lib/
-│   └── comun.sh                    # 🧰 Librería central: motor multi-distro, capas de abstracción y utilidades de red
+│   ├── comun.sh                    # 🧰 Librería central: motor multi-distro, capas de abstracción y utilidades de red
+│   └── servidor_aprovisionamiento.py # 🌐 Servidor HTTP para despliegue de SSH e indexado en vivo
 ├── Red/
 │   ├── diagnostico_red.sh          # ⚡ Test exprés de conectividad, Gateway, DNS y Ceibal
 │   ├── proxy_DGES.sh               # 🛡️ Gestor de Proxy DGES multi-distro (APT, DNF y entorno global)
@@ -67,6 +69,7 @@ POITE-Scripts-SH-DGES/
 │   ├── chequear_repositorios_ubuntu20-04.sh # 📦 Verificación dinámica de repositorios oficiales
 │   ├── mapear_red_equipos.sh       # 🗺️ Escaneo de subred, resolución de hostnames (lab1-pcXX) y alerta de ausentes
 │   ├── asignar_hostname.sh         # 🏷️ Asignación de hostname local, remoto o en lote secuencial
+│   ├── despliegue_ssh_aula.sh      # 🚀 Despliegue automatizado de SSH (Servidor HTTP / Pendrive USB)
 │   ├── ejecutar_ansible_aula.sh    # 🤖 Lanzador guiado de playbooks de Ansible para el laboratorio
 │   ├── registrar_ip.sh             # 📝 Registro de IP del host en ips.txt
 │   ├── conexion_remota_ip.sh       # 📤 Distribución y ejecución remota por SSH (IP)
@@ -94,7 +97,7 @@ POITE-Scripts-SH-DGES/
 │   ├── arreglar_reloj_ubuntu.sh    # 🕒 Sincronización NTP (Chrony / timesyncd) y reloj CMOS de BIOS
 │   ├── reparar_dependencias.sh     # 🧱 Reparación adaptativa según gestor (APT, DNF, Pacman, Zypper)
 │   ├── limpieza_disco.sh           # 🧹 Liberación de espacio (cachés de paquetes, thumbnails, logs)
-│   └── ssh.sh                      # 🔐 Instalación y arranque del servicio OpenSSH (ssh / sshd)
+│   └── ssh.sh                      # 🔐 Instalación, arranque y enlace al despliegue masivo de SSH
 ├── InstalacionesFrecuentes/
 │   ├── instalar_ansible.sh         # 🤖 Instalador de Ansible, sshpass y generación de playbooks escolares
 │   ├── instalar_visual_studio_code.sh # 🧑‍💻 VS Code oficial multi-distro (repositorios APT/DNF/Zypper/Arch)
@@ -123,19 +126,24 @@ POITE-Scripts-SH-DGES/
 
 ## 🛠️ Aspectos Técnicos Destacados de Ingeniería
 
-1. **Mapeo de Red y Detección de Hostnames del Aula (`lab1-pcXX`):**
+1. **Aprovisionamiento Express de SSH en Equipos Nuevos (`Red/despliegue_ssh_aula.sh`):**
+   Resuelve el clásico problema del laboratorio sin acceso remoto previo mediante dos estrategias:
+   * **Servidor HTTP Local (One-Liner):** Inicia un microservidor web en la PC del docente y genera una sola línea (`curl -s http://IP:8080/bootstrap.sh | sudo bash`). Al ejecutarse en las PCs clientes, instala OpenSSH, inyecta la clave pública del profesor y realiza un *callback* registrando la IP, MAC y Hostname en tiempo real en la consola del docente.
+   * **Instalador USB Plug & Play (1-Clic):** Genera en un pendrive un lanzador gráfico `.desktop` de doble clic que instala SSH y anota la IP de la máquina en un archivo del pendrive en menos de 5 segundos.
+
+2. **Mapeo de Red y Detección de Hostnames del Aula (`lab1-pcXX`):**
    El módulo `Red/mapear_red_equipos.sh` escanea la subred local (usando `nmap` de alta velocidad o barrido nativo paralelo en Bash), resuelve direcciones MAC y hostnames mediante DNS inverso y mDNS (`avahi-resolve`), filtra equipos bajo patrones como `lab1-pc*` y realiza un **análisis de secuencia de computadoras**, notificando al docente si alguna máquina intermedia (ej: `lab1-pc03`) está apagada o desconectada.
 
-2. **Asignación Asistida y en Lote de Hostnames (`Red/asignar_hostname.sh`):**
+3. **Asignación Asistida y en Lote de Hostnames (`Red/asignar_hostname.sh`):**
    Permite renombrar la computadora local, un equipo remoto por SSH, o ejecutar una **renombración secuencial masiva** de todo el laboratorio (`lab1-pc01`, `lab1-pc02`...), actualizando simultáneamente `hostnamectl` y `/etc/hosts` para preservar la resolución interna de `sudo`.
 
-3. **Gestión Masiva Automatizada con Ansible:**
+4. **Gestión Masiva Automatizada con Ansible:**
    El módulo `InstalacionesFrecuentes/instalar_ansible.sh` aprovisiona Ansible y `sshpass` en cualquier distribución, crea la configuración optimizada para laboratorios educativos (`ansible.cfg`) y vincula directamente el inventario generado por el mapeo de red (`inventario_ansible.ini`). Incluye lanzadores para ejecutar playbooks de prueba de red, sincronización de hora, actualización de paquetes o apagado conjunto al terminar la clase.
 
-4. **Motor de Detección Multi-Distribución y Capa de Abstracción Universal:**
+5. **Motor de Detección Multi-Distribución y Capa de Abstracción Universal:**
    Identifica en tiempo de ejecución la familia del sistema operativo (`debian`, `redhat`, `arch`, `suse`), adaptando comandos de paquetes (`apt`, `dnf`, `pacman`, `zypper`), repositorios oficiales y nombres de servicios systemd (`ssh` vs `sshd`, `systemd-timesyncd` vs `chronyd`).
 
-5. **Autologin Multi-Display Manager:**
+6. **Autologin Multi-Display Manager:**
    Compatible con **LightDM** (Xubuntu, Lubuntu, Ceibal Linux, Linux Mint), **GDM / GDM3** (Ubuntu GNOME, Fedora Workstation) y **SDDM** (KDE Plasma).
 
 ---
