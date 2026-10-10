@@ -3,6 +3,7 @@
 # ASISTENTE POITE - DGES / URUGUAY
 # Guía y Metodología de Clonación Multicast en Red con Clonezilla
 # Orientado a Laboratorios de Informática de Secundaria (DGES / UTU)
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

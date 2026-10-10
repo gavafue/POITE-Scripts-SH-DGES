@@ -2,6 +2,7 @@
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
 # Aprovisionamiento y Despliegue Automatizado de SSH en el Aula
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

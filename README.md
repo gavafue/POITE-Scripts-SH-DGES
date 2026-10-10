@@ -13,34 +13,55 @@ Desarrollado y mantenido por el **Prof. Gabriel Vázquez** (Docente de Informát
 
 ---
 
-## 🎯 Flujo de Trabajo en el Laboratorio: Ciclo Completo DGES
+## 🎯 Niveles de Experiencia del POITE (Interfaz Adaptativa)
 
-Al comienzo del año lectivo, los laboratorios de informática liceales se formatean y acondicionan. El **Asistente POITE** estructura este proceso en un flujo de tres fases metodológicas impecables:
+En las instituciones educativas uruguayas, los docentes y Profesores Orientadores en Informática y Tecnología Educativa (**POITE**) provienen de formaciones diversas. El **Asistente POITE** ofrece tres niveles de interfaz adaptables con un solo clic:
+
+```text
+======================================================================
+  🌱 1) Modo Básico / Asistido:
+     Para docentes sin experiencia en administración Linux. Interfaz en lenguaje
+     humano de 3 botones con "Piloto Automático" (cero comandos de terminal).
+
+  🛠️  2) Modo Intermedio / Administrador de Aula (Estándar):
+     Flujo metódico completo DGES con paneles temáticos organizados por tareas:
+     Red, Usuarios, Mantenimiento, Instalaciones y Control de Clases.
+
+  💻 3) Modo Avanzado / SysAdmin & DevOps:
+     Para técnicos de laboratorio e ingenieros. Consola ad-hoc de Ansible,
+     edición libre de inventarios .ini y playbooks YAML, sockets Python y Nmap.
+======================================================================
+```
+> Puede alternar entre niveles en cualquier momento pulsando **`N`** o desde el menú de configuración.
+
+---
+
+## ⚡ Metodología Operativa: Flujo de Inicio de Año (DGES)
+
+Al comienzo del ciclo lectivo, los equipos del aula se formatean y acondicionan. El asistente estructura este proceso en la secuencia real de trabajo del docente:
 
 ```mermaid
 flowchart LR
-    A["🛡️ Paso 1: Proxy DGES\n(Habilitar Internet)"] --> B["📦 Paso 2: Imagen Maestra\n(VirtualBox + Sysprep)"]
-    B --> C["🚀 Clonación Red\n(Clonezilla Multicast)"]
-    C --> D["⚡ Paso 3: Día 1 Aula\n(Hostnames + Ansible)"]
+    A["🏠 Paso 1: PC Personal\n(VM VirtualBox sin Proxy)"] --> B["🚀 Paso 2: Red Local LAN\n(Clonezilla Multicast)"]
+    B --> C["🏫 Paso 3: Día 1 Liceo\n(Hostnames + Proxy DGES Ansible)"]
 ```
 
-### 1. 🛡️ Paso 1: Acceso a Internet vía Proxy Institucional DGES
-En los liceos y salas de informática no existe salida directa a Internet; se requiere el proxy institucional (por defecto `10.4.142.24:8080`). Sin este ajuste, la terminal no puede descargar paquetes ni repositorios.
-* El módulo configura simultáneamente: **APT**, **DNF**, `/etc/environment` (PAM global), `/etc/profile.d/proxy-dges.sh` (terminales interactivas), `/etc/wgetrc` y `/etc/sudoers.d/99-proxy-env` (`env_keep` para evitar que `sudo` descarte el proxy).
-* Incluye comprobación automática inmediata contra portales educativos (`uruguayeduca.anep.edu.uy`).
+### 1. 🏠 Paso 1: Preparación de la Imagen Maestra en PC Personal (VirtualBox)
+* **Conexión Directa a Internet:** La máquina de referencia se acondiciona en la computadora personal del docente con fibra óptica y sin proxy institucional.
+* **Acondicionamiento Integral:** Actualiza el sistema operativo, crea la cuenta estándar de estudiante (`alumno`), configura el inicio de sesión automático (autologin de escritorio), habilita OpenSSH Server y pre-inyecta la clave SSH del docente (`authorized_keys`) para permitir acceso remoto sin contraseñas desde el día 1.
+* **Software Pedagógico:** Instala LibreOffice en español, suite educativa (GIMP, Geogebra, Thonny, Scratch, Geany), Google Chrome y Visual Studio Code.
+* **Sellado y Sysprep Linux:** Resetea `/etc/machine-id` a 0 bytes para evitar la colisión crítica de IPs en el switch/DHCP del liceo; elimina llaves de host SSH viejas; instala el servicio `poite-firstboot.service` que generará identidad criptográfica única en cada PC física; y apaga la VM de forma segura.
 
-### 2. 📦 Paso 2: Preparación y Sellado de la Imagen Maestra (VirtualBox / Clonezilla)
-El docente construye una máquina virtual en VirtualBox que sirve de "Golden Master":
-* **Acondicionamiento Integral:** Configura el Proxy DGES, actualiza el sistema, crea el usuario `alumno`, habilita el autologin en el escritorio, instala OpenSSH Server y pre-inyecta la clave pública SSH del docente para control remoto sin contraseñas.
-* **Instalación de Software:** Suite educativa (LibreOffice, GIMP, Geogebra, Scratch, Thonny), navegadores web (Chrome / Brave) y Visual Studio Code.
-* **Sellado y Generalización (Linux Sysprep):** Resetea `/etc/machine-id` a 0 bytes para evitar que todas las PCs clonadas reciban la misma IP por DHCP; elimina llaves de host SSH viejas; instala el servicio `poite-firstboot.service` para regenerar claves únicas por hardware en el primer arranque físico; y purga historiales, temporales y cachés antes de apagar.
-* **Distribución Multicast:** Guía paso a paso para clonar todo el laboratorio simultáneamente en 20 minutos con Clonezilla Lite Server.
+### 2. 🚀 Paso 2: Distribución en Red con Clonezilla Multicast
+* **Operación 100% Local:** La clonación por red hacia las 25-30 PCs del aula se realiza en la red local LAN (sin requerir salida a Internet ni proxy).
+* **Velocidad:** Mediante Clonezilla Lite Server en modo Multicast, todas las computadoras del aula se clonan simultáneamente en 15 a 25 minutos.
 
-### 3. 🚀 Paso 3: Post-Clonación Día 1 (Hostnames e Inventario Ansible)
-Una vez que las computadoras del aula encienden con la imagen clonada:
-* Cada PC arranca con identidad única (`machine-id`), autologin listo, proxy funcional y SSH abierto para el docente.
-* Desde la máquina principal se mapea la subred, se asignan en lote nombres secuenciales estandarizados (`lab1-pc01`, `lab1-pc02`... `lab1-pc30`) y se genera automáticamente el inventario `inventario_ansible.ini`.
-* ¡El docente toma el control del aula con **Ansible desde el Día 1**! (Ping masivo, sincronización horaria, notificaciones en pantalla y apagado coordinado).
+### 3. 🏫 Paso 3: Post-Clonación Día 1 en el Liceo (Hostnames y Proxy DGES con Ansible)
+Al encender las PCs físicas en el liceo, cada una arranca con identidad única, autologin y SSH listo, pero aún sin acceso a Internet:
+* **Mapeo del Aula:** El docente escanea la subred escolar y detecta las IPs de todas las computadoras encendidas.
+* **Asignación Secuencial de Hostnames:** Vía SSH, renombra en lote las PCs (`lab1-pc01`, `lab1-pc02`... `lab1-pc30`) y genera automáticamente el inventario `inventario_ansible.ini`.
+* **Despliegue Masivo de Proxy DGES:** Con el playbook `09_configurar_proxy_aula.yml`, el docente **inyecta el Proxy DGES (`10.4.142.24:8080`) en todas las computadoras del aula en un solo clic** (APT, DNF, `/etc/environment`, `/etc/profile.d`, `/etc/wgetrc` y `sudoers`).
+* **Verificación y Control con Ansible:** Prueba de Internet en todo el aula, sincronización horaria inmediata y disponibilidad para enviar avisos a pantalla o apagar el laboratorio al finalizar la jornada.
 
 ---
 
@@ -72,25 +93,33 @@ chmod +x menu.sh
 
 ```text
 POITE-Scripts-SH-DGES/
-├── menu.sh                         # 🖥️ Menú principal interactivo con estado en vivo y ciclo DGES
+├── menu.sh                         # 🖥️ Menú principal interactivo con selector dinámico de nivel de experiencia
 ├── instalar_comando.sh             # 🚀 Enlace y lanzador global /usr/local/bin/poite
 ├── lib/
-│   ├── comun.sh                    # 🧰 Librería central: motor multi-distro, capas de abstracción y red
+│   ├── comun.sh                    # 🧰 Librería central: motor multi-distro, capas de abstracción y niveles POITE
 │   └── servidor_aprovisionamiento.py # 🌐 Servidor HTTP para aprovisionamiento SSH exprés y callbacks
+├── submenus/
+│   ├── modo_basico.sh              # 🌱 Interfaz asistida en 3 botones para docentes sin experiencia Linux
+│   ├── modo_avanzado.sh            # 💻 Interfaz SysAdmin & DevOps con consola ad-hoc y playbooks YAML
+│   ├── red.sh                      # 🌐 Submenú de Red y Conectividad
+│   ├── usuarios.sh                 # 👥 Submenú de Usuarios y Cuentas
+│   ├── mantenimiento.sh            # 🧹 Submenú de Mantenimiento Preventivo y Correctivo
+│   ├── instalaciones.sh            # 🧩 Submenú de Instalaciones Frecuentes
+│   └── sistema.sh                  # 💻 Submenú de Auditoría de Hardware y Sistema
 ├── ImagenMaestra/                   # 📦 Módulo de Preparación y Sellado de Imagen Maestra
-│   ├── menu_imagen_maestra.sh      # Submenú interactivo de gestión de la VM / Imagen
-│   ├── preparar_imagen_maestra.sh  # Asistente guiado todo en uno (Proxy, Alumno, Autologin, SSH, Software)
+│   ├── menu_imagen_maestra.sh      # Submenú de gestión de la VM / Imagen de referencia
+│   ├── preparar_imagen_maestra.sh  # Asistente en PC personal (Internet directo, Alumno, Autologin, SSH, Software)
 │   ├── generalizar_para_clonar.sh  # Sysprep Linux: vaciado de machine-id, llaves SSH y apagado seguro
 │   └── guia_clonezilla.sh          # Guía práctica para clonación masiva por red con Clonezilla Multicast
 ├── PostClonacion/                  # 🚀 Módulo Post-Clonación Día 1 y Control con Ansible
-│   └── menu_post_clonacion.sh      # Descubrimiento, asignación lab1-pcXX, inventario y playbooks de aula
+│   └── menu_post_clonacion.sh      # Mapeo, hostnames lab1-pcXX, despliegue masivo de Proxy DGES y playbooks
 ├── ReplicacionAula/                # 🔄 Módulo de Replicación Alternativa (Sin Clonar Discos)
 │   ├── menu_replicacion.sh         # Submenú de replicación de configuración por red
 │   ├── capturar_perfil_maestro.sh  # Captura software, usuarios y ajustes de la PC de referencia
 │   ├── ver_perfil_maestro.sh       # Visualizador estructurado del perfil maestro
 │   └── desplegar_perfil_remoto.sh  # Despliegue en red vía Ansible o bucle SSH nativo
 ├── Red/
-│   ├── proxy_DGES.sh               # 🛡️ Gestor integral de Proxy DGES (APT, DNF, env, sudoers, wget)
+│   ├── proxy_DGES.sh               # 🛡️ Gestor integral de Proxy DGES local (APT, DNF, env, sudoers, wget)
 │   ├── mapear_red_equipos.sh       # 🗺️ Escaneo de subred, resolución de hostnames y alerta de ausentes
 │   ├── asignar_hostname.sh         # 🏷️ Asignación de hostname local, remoto o en lote secuencial
 │   ├── despliegue_ssh_aula.sh      # 🚀 Despliegue automatizado de SSH (Servidor HTTP / Pendrive USB)
@@ -105,16 +134,6 @@ POITE-Scripts-SH-DGES/
 │   ├── cambiar_usuario.sh          # 🔁 Autologin multi-display manager (LightDM, GDM3, GDM, SDDM)
 │   ├── resetear_password.sh        # 🔑 Restablecimiento asistido de contraseñas
 │   └── eliminar_usuario.sh         # ➖ Eliminación segura con protección de cuentas críticas
-├── Sistema/
-│   ├── completo.sh                 # 📋 Auditoría integral consolidada del puesto
-│   ├── so.sh                       # 🏷️ Sistema operativo, familia, versión y entorno gráfico
-│   ├── cpu.sh                      # 🧠 Información detallada de CPU (lscpu, modelo, núcleos)
-│   ├── memoria.sh                  # 🪫 Memoria RAM y Swap con porcentaje de ocupación
-│   ├── discos.sh                   # 💽 Almacenamiento, puntos de montaje y particiones
-│   ├── hardware.sh                 # 🖧 Reporte completo de hardware con lshw
-│   ├── procesos.sh                 # 🧮 Visor interactivo de procesos activos
-│   ├── kernel.sh                   # 🧩 Versión del kernel Linux y arquitectura
-│   └── variables.sh                # 📦 Variables de entorno de la sesión
 ├── Mantenimiento/
 │   ├── arreglar_reloj_ubuntu.sh    # 🕒 Sincronización NTP (Chrony / timesyncd) y reloj CMOS de BIOS
 │   ├── reparar_dependencias.sh     # 🧱 Reparación adaptativa según gestor (APT, DNF, Pacman, Zypper)
@@ -138,36 +157,17 @@ POITE-Scripts-SH-DGES/
 │       ├── 05_apagar_aula.yml      # Apagado coordinado al terminar el turno
 │       ├── 06_verificar_proxy_internet.yml # Verificación masiva de proxy e Internet
 │       ├── 07_reiniciar_aula.yml   # Reinicio masivo de máquinas
-│       └── 08_notificar_alumnos.yml# Mensajes y avisos a las pantallas de estudiantes
+│       ├── 08_notificar_alumnos.yml# Mensajes y avisos a las pantallas de estudiantes
+│       ├── 09_configurar_proxy_aula.yml # Inyección masiva de Proxy DGES en todo el laboratorio
+│       └── 10_desactivar_proxy_aula.yml # Desactivación masiva de proxy
 └── RegistrarIP/                    # 📁 Directorio central de persistencia
+    ├── config_poite.conf           # Configuración del nivel de experiencia del POITE
     ├── ips.txt                     # Listado de IPs registradas
     ├── macs.txt                    # Listado de MACs registradas
     ├── inventario_ansible.ini      # Inventario dinámico generado para Ansible
     ├── remoto.sh                   # Script a distribuir remotamente por el aula
     └── registro_ejecuciones.log    # Historial de ejecuciones
 ```
-
----
-
-## 🛠️ Aspectos Técnicos Destacados de Ingeniería
-
-1. **Gestor Universal de Proxy DGES (`Red/proxy_DGES.sh`):**
-   * Configuración integral en gestores de paquetes (APT en `/etc/apt/apt.conf.d/99proxy-dges.conf`, DNF en `/etc/dnf/dnf.conf`), variables del sistema (`/etc/environment` y `/etc/profile.d/proxy-dges.sh`), gestores de descarga (`/etc/wgetrc`) y preservación obligatoria en `sudo` mediante `/etc/sudoers.d/99-proxy-env` (`Defaults env_keep`).
-   * Test de conectividad inmediato contra portales institucionales de Ceibal y Uruguay Educa.
-
-2. **Acondicionamiento y Sellado de Imagen Maestra (`ImagenMaestra/`):**
-   * **Preparación Automatizada:** Orquesta la creación de cuentas de alumnos, autologin gráfico, SSH, inyección de claves SSH y software escolar en la máquina virtual de VirtualBox.
-   * **Generalización (Sysprep Linux):** Resetea `/etc/machine-id` a 0 bytes para evitar la colisión crítica de IPs en servidores DHCP por coincidencia de DUID, elimina llaves de host SSH viejas, limpia leases de red, e instala el servicio `poite-firstboot.service` que regenera la identidad física única en el primer arranque de cada máquina clonada.
-
-3. **Orquestación de Aula con Ansible desde el Día 1 (`PostClonacion/`):**
-   * Proporciona descubrimiento de red, asignación masiva de hostnames (`lab1-pc01`... `lab1-pcXX`) y generación automática del inventario `inventario_ansible.ini`.
-   * Permite ejecutar comandos y playbooks masivos para verificar conectividad (`ping`), sincronizar relojes, auditar la salida a Internet por proxy y apagar o reiniciar el aula completa.
-
-4. **Replicación Alternativa sin Clonar Discos (`ReplicacionAula/`):**
-   * Alternativa ligera para cuando los equipos ya tienen el sistema operativo base limpio y se desea sincronizar software, usuarios y ajustes sin transferir imágenes pesadas de disco ni lidiar con particionados.
-
-5. **Motor de Detección Multi-Distribución y Capa de Abstracción Universal (`lib/comun.sh`):**
-   * Identifica en tiempo de ejecución la familia del sistema operativo (`debian`, `redhat`, `arch`, `suse`), adaptando comandos de paquetes (`apt`, `dnf`, `pacman`, `zypper`), repositorios oficiales y nombres de servicios systemd (`ssh` vs `sshd`, `systemd-timesyncd` vs `chronyd`).
 
 ---
 

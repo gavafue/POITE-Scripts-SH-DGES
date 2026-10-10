@@ -2,6 +2,7 @@
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
 # Lanzador de Automatización con Ansible para el Laboratorio
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

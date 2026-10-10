@@ -1,0 +1,91 @@
+---
+# ==============================================================================
+# PLAYBOOK DE ANSIBLE - DESPLIEGUE MASIVO DE PROXY INSTITUCIONAL DGES
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
+# ==============================================================================
+- name: Configurar Proxy DGES en todas las computadoras del laboratorio
+  hosts: laboratorio
+  become: true
+  vars:
+    proxy_dges: "10.4.142.24:8080"
+
+  tasks:
+    - name: Configurar proxy DGES en APT (Debian/Ubuntu)
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/99proxy-dges.conf
+        content: |
+          Acquire::http::proxy "http://{{ proxy_dges }}/";
+          Acquire::https::proxy "http://{{ proxy_dges }}/";
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_os_family == 'Debian'
+
+    - name: Configurar proxy DGES en DNF (RedHat/Fedora)
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^proxy='
+        line: "proxy=http://{{ proxy_dges }}/"
+      when: ansible_os_family == 'RedHat'
+
+    - name: Configurar variables globales de entorno en /etc/environment
+      ansible.builtin.blockinfile:
+        path: /etc/environment
+        marker: "# {mark} ANSIBLE MANAGED PROXY DGES - PROF GABRIEL VAZQUEZ"
+        block: |
+          http_proxy="http://{{ proxy_dges }}/"
+          https_proxy="http://{{ proxy_dges }}/"
+          HTTP_PROXY="http://{{ proxy_dges }}/"
+          HTTPS_PROXY="http://{{ proxy_dges }}/"
+          no_proxy="localhost,127.0.0.1,*.edu.uy,10.0.0.0/8"
+          NO_PROXY="localhost,127.0.0.1,*.edu.uy,10.0.0.0/8"
+
+    - name: Configurar variables para shells interactivas en /etc/profile.d/proxy-dges.sh
+      ansible.builtin.copy:
+        dest: /etc/profile.d/proxy-dges.sh
+        content: |
+          # Configuración Proxy DGES - Prof. Gabriel Vázquez
+          export http_proxy="http://{{ proxy_dges }}/"
+          export https_proxy="http://{{ proxy_dges }}/"
+          export HTTP_PROXY="http://{{ proxy_dges }}/"
+          export HTTPS_PROXY="http://{{ proxy_dges }}/"
+          export no_proxy="localhost,127.0.0.1,*.edu.uy,10.0.0.0/8"
+          export NO_PROXY="localhost,127.0.0.1,*.edu.uy,10.0.0.0/8"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Asegurar preservación de variables de proxy en sudoers
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/99-proxy-env
+        content: |
+          Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"
+        owner: root
+        group: root
+        mode: '0440'
+
+    - name: Configurar proxy en /etc/wgetrc
+      ansible.builtin.blockinfile:
+        path: /etc/wgetrc
+        marker: "# {mark} ANSIBLE MANAGED PROXY DGES"
+        block: |
+          http_proxy = http://{{ proxy_dges }}/
+          https_proxy = http://{{ proxy_dges }}/
+          use_proxy = on
+      when: ansible_check_mode is not defined
+
+    - name: Probar conectividad hacia Uruguay Educa tras aplicar proxy
+      ansible.builtin.command: curl -s -I --connect-timeout 5 --proxy "http://{{ proxy_dges }}" https://uruguayeduca.anep.edu.uy
+      register: test_salida
+      changed_when: false
+      failed_when: false
+
+    - name: Mostrar estado de conexión
+      ansible.builtin.debug:
+        msg: "✅ {{ inventory_hostname }}: Proxy DGES ({{ proxy_dges }}) configurado e Internet funcionando."
+      when: test_salida.rc == 0
+
+    - name: Notificar si no hubo respuesta inmediata
+      ansible.builtin.debug:
+        msg: "⚠️ {{ inventory_hostname }}: Proxy configurado pero no respondió el portal. Verifique cable de red."
+      when: test_salida.rc != 0

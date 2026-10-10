@@ -1,7 +1,8 @@
 #!/bin/bash
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
-# Submenú: Post-Clonación Día 1 - Asignación de Hostnames y Orquestación Ansible
+# Submenú: Post-Clonación Día 1 - Asignación de Hostnames, Proxy DGES y Ansible
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -33,7 +34,7 @@ ejecutar_playbook() {
     fi
 
     echo
-    echo -e "${CYAN}Ejecutando: $pb en todas las PCs del laboratorio...${RESET}"
+    echo -e "${CYAN}Ejecutando: $pb en todas las PCs del aula...${RESET}"
     echo "----------------------------------------------------------------------"
     if [[ -n "$extra_args" ]]; then
         ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/$pb" -e "$extra_args"
@@ -44,35 +45,100 @@ ejecutar_playbook() {
     pausar
 }
 
-while true; do
-    imprimir_encabezado "🚀 POST-CLONACIÓN DÍA 1: ASIGNACIÓN Y CONTROL CON ANSIBLE" "Tareas iniciales tras encender las PCs clonadas con Clonezilla"
+asistente_puesta_a_punto_completa() {
+    imprimir_encabezado "🚀 PUESTA A PUNTO INTEGRAL EN 1 CLIC (POST-CLONACIÓN)" "Prof. Gabriel Vázquez · Configuración guiada completa del aula"
+    echo -e "${YELLOW}Este asistente automatizará todo el Día 1 en secuencia:${RESET}"
+    echo -e "  1. 🗺️  Escaneará la red para detectar todas las PCs encendidas."
+    echo -e "  2. 🏷️  Asignará nombres de host secuenciales (ej: lab1-pc01... lab1-pc25)."
+    echo -e "  3. 🛡️  Desplegará el Proxy Institucional DGES en todas las máquinas."
+    echo -e "  4. 🧪 Probará que todas las máquinas tengan salida real a Internet."
+    echo -e "  5. 🕒 Sincronizará la fecha y la hora exacta en todo el laboratorio."
+    echo
+    echo -ne "¿Desea comenzar la puesta a punto automática ahora? (S/n): "
+    read -r resp_run
+    if [[ -n "$resp_run" && ! "$resp_run" =~ ^[sS]$ ]]; then
+        imprimir_info "Operación cancelada."
+        return 0
+    fi
 
-    echo -e "  ${GREEN}1)${RESET}  🗺️  ${BOLD}Mapear red y detectar equipos clonados en el aula${RESET}"
-    echo -e "         ${CYAN}(Descubre las direcciones IP de todas las computadoras recién encendidas)${RESET}"
+    # Paso 1: Mapeo de Red
     echo
-    echo -e "  ${GREEN}2)${RESET}  🏷️  ${BOLD}Asignación masiva secuencial de Hostnames (lab1-pcXX)${RESET}"
-    echo -e "         ${CYAN}(Asigna nombres tipo lab1-pc01... lab1-pc30 vía SSH y genera el inventario)${RESET}"
+    imprimir_info "Fase 1/5: Escaneando computadoras del aula..."
+    bash "$BASE_DIR/Red/mapear_red_equipos.sh"
+
+    # Paso 2: Asignación de Hostnames
     echo
-    echo -e "  ${GREEN}3)${RESET}  📋 Ver / Editar inventario de Ansible del aula"
-    echo -e "  ${GREEN}4)${RESET}  📡 Probar conectividad con todo el aula (Ping masivo con Ansible)"
-    echo -e "  ${GREEN}5)${RESET}  🕒 Sincronizar reloj y zona horaria (Montevideo) en todo el aula"
-    echo -e "  ${GREEN}6)${RESET}  🛡️  Verificar salida a Internet y Proxy DGES en todas las PCs"
-    echo -e "  ${GREEN}7)${RESET}  📢 Emitir mensaje o notificación a las terminales de los estudiantes"
-    echo -e "  ${YELLOW}8)${RESET}  🔌 Control de energía masivo (Apagar o reiniciar todo el aula)"
+    imprimir_info "Fase 2/5: Asignando nombres secuenciales (lab1-pcXX)..."
+    bash "$BASE_DIR/Red/asignar_hostname.sh" <<< "3"
+
+    # Paso 3: Despliegue de Proxy DGES
+    echo
+    imprimir_info "Fase 3/5: Desplegando Proxy DGES masivamente..."
+    ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/09_configurar_proxy_aula.yml"
+
+    # Paso 4: Verificación de Internet
+    echo
+    imprimir_info "Fase 4/5: Comprobando salida a Internet vía Proxy..."
+    ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/06_verificar_proxy_internet.yml"
+
+    # Paso 5: Sincronización de Reloj
+    echo
+    imprimir_info "Fase 5/5: Sincronizando hora y fecha del laboratorio..."
+    ANSIBLE_CONFIG="$DIR_ANSIBLE/ansible.cfg" ansible-playbook -i "$INVENTARIO_INI" "$DIR_PLAYBOOKS/02_sincronizar_reloj.yml"
+
+    echo
+    imprimir_exito "¡Puesta a punto finalizada! Todas las computadoras tienen nombre, proxy, hora e Internet."
+    pausar
+}
+
+while true; do
+    imprimir_encabezado "🚀 POST-CLONACIÓN DÍA 1: ASIGNACIÓN Y CONTROL CON ANSIBLE" "Prof. Gabriel Vázquez (INET / ANEP) · Tareas iniciales tras clonar con Clonezilla"
+
+    echo -e "  ${GREEN}1)${RESET}  🌟 ${BOLD}PUESTA A PUNTO INTEGRAL EN 1 CLIC (Piloto Automático)${RESET}"
+    echo -e "         ${CYAN}(Mapeo + Hostnames lab1-pcXX + Proxy DGES + Internet + Reloj en secuencia)${RESET}"
+    echo
+    echo -e "  ${GREEN}2)${RESET}  🗺️  Mapear red y detectar equipos recién encendidos en el aula"
+    echo -e "  ${GREEN}3)${RESET}  🏷️  Asignación masiva secuencial de Hostnames (lab1-pc01... lab1-pc30)"
+    echo -e "  ${GREEN}4)${RESET}  🛡️  ${BOLD}Habilitar Internet: Desplegar Proxy DGES en todo el laboratorio${RESET}"
+    echo -e "  ${GREEN}5)${RESET}  🧪 Probar conectividad a Internet y Proxy en todas las PCs del aula"
+    echo -e "  ${GREEN}6)${RESET}  🕒 Sincronizar reloj y zona horaria (Montevideo) en todo el aula"
+    echo -e "  ${GREEN}7)${RESET}  📦 Actualizar repositorios y paquetes de software en lote ($PKG_MANAGER)"
+    echo -e "  ${GREEN}8)${RESET}  📋 Ver / Editar inventario de Ansible del aula"
+    echo -e "  ${GREEN}9)${RESET}  📢 Emitir mensaje o notificación a las pantallas de los estudiantes"
+    echo -e "  ${YELLOW}10)${RESET} 🔌 Control de energía masivo (Apagar o reiniciar todo el aula)"
     echo -e "  ${RED}0)${RESET}  🔙 Volver al menú principal"
     echo -e "${BLUE}----------------------------------------------------------------------${RESET}"
-    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-8]: ${RESET}"
+    echo -ne "${BOLD}${YELLOW}Seleccione una opción [0-10]: ${RESET}"
     read -r opcion
 
     case "$opcion" in
         1)
-            bash "$BASE_DIR/Red/mapear_red_equipos.sh"
+            asistente_puesta_a_punto_completa
             ;;
         2)
-            # Ejecuta el modo 3 de asignación en lote
-            bash "$BASE_DIR/Red/asignar_hostname.sh" <<< "3"
+            bash "$BASE_DIR/Red/mapear_red_equipos.sh"
             ;;
         3)
+            bash "$BASE_DIR/Red/asignar_hostname.sh" <<< "3"
+            ;;
+        4)
+            echo
+            echo -e "${CYAN}Despliegue masivo del Proxy Institucional DGES en todas las PCs clonadas:${RESET}"
+            echo -ne "Ingrese IP y puerto del proxy [Enter para 10.4.142.24:8080]: "
+            read -r px_in
+            px_val="${px_in:-10.4.142.24:8080}"
+            ejecutar_playbook "09_configurar_proxy_aula.yml" "proxy_dges=$px_val"
+            ;;
+        5)
+            ejecutar_playbook "06_verificar_proxy_internet.yml"
+            ;;
+        6)
+            ejecutar_playbook "02_sincronizar_reloj.yml"
+            ;;
+        7)
+            ejecutar_playbook "03_actualizar_paquetes.yml"
+            ;;
+        8)
             echo
             if [[ -f "$INVENTARIO_INI" ]]; then
                 echo -e "${BOLD}Inventario actual de Ansible ($INVENTARIO_INI):${RESET}"
@@ -90,16 +156,7 @@ while true; do
                 pausar
             fi
             ;;
-        4)
-            ejecutar_playbook "01_ping_aula.yml"
-            ;;
-        5)
-            ejecutar_playbook "02_sincronizar_reloj.yml"
-            ;;
-        6)
-            ejecutar_playbook "06_verificar_proxy_internet.yml"
-            ;;
-        7)
+        9)
             echo
             echo -ne "${CYAN}Ingrese el mensaje a transmitir a las terminales del aula: ${RESET}"
             read -r texto_msg
@@ -107,7 +164,7 @@ while true; do
                 ejecutar_playbook "08_notificar_alumnos.yml" "mensaje=$texto_msg"
             fi
             ;;
-        8)
+        10)
             echo
             echo -e "${YELLOW}Control de energía en bloque para el aula:${RESET}"
             echo -e "  [1] Apagar todas las PCs del aula (Final de turno)"

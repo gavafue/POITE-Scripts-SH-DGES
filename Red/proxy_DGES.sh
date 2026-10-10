@@ -4,6 +4,7 @@
 # Gestor Integral de Proxy Institucional DGES multi-distribución
 # Configuración en todos los subsistemas: APT, DNF, /etc/environment,
 # /etc/profile.d, /etc/wgetrc y preservación de variables en sudoers
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

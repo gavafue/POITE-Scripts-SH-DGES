@@ -1,0 +1,47 @@
+---
+# ==============================================================================
+# PLAYBOOK DE ANSIBLE - DESACTIVACIÓN DE PROXY EN EL LABORATORIO
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
+# ==============================================================================
+- name: Desactivar Proxy DGES y restaurar conexión directa en el laboratorio
+  hosts: laboratorio
+  become: true
+
+  tasks:
+    - name: Eliminar configuración de proxy en APT
+      ansible.builtin.file:
+        path: /etc/apt/apt.conf.d/99proxy-dges.conf
+        state: absent
+
+    - name: Eliminar configuración de proxy en DNF
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^proxy='
+        state: absent
+      when: ansible_os_family == 'RedHat'
+
+    - name: Limpiar bloque de proxy en /etc/environment
+      ansible.builtin.blockinfile:
+        path: /etc/environment
+        marker: "# {mark} ANSIBLE MANAGED PROXY DGES - PROF GABRIEL VAZQUEZ"
+        state: absent
+
+    - name: Eliminar archivo de variables de shell /etc/profile.d/proxy-dges.sh
+      ansible.builtin.file:
+        path: /etc/profile.d/proxy-dges.sh
+        state: absent
+
+    - name: Eliminar archivo de sudoers de proxy
+      ansible.builtin.file:
+        path: /etc/sudoers.d/99-proxy-env
+        state: absent
+
+    - name: Limpiar bloque de proxy en /etc/wgetrc
+      ansible.builtin.blockinfile:
+        path: /etc/wgetrc
+        marker: "# {mark} ANSIBLE MANAGED PROXY DGES"
+        state: absent
+
+    - name: Notificar finalización
+      ansible.builtin.debug:
+        msg: "✅ {{ inventory_hostname }}: Proxy desactivado. Operando en conexión directa."

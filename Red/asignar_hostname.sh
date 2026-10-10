@@ -2,6 +2,7 @@
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
 # Asignación Asistida de Hostnames a Equipos (Local, Remoto y Secuencial en Lote)
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -2,6 +2,7 @@
 # ==============================================================================
 # ASISTENTE POITE - DGES / URUGUAY
 # Instalador y Configurador de Ansible para Automatización de Aulas GNU/Linux
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

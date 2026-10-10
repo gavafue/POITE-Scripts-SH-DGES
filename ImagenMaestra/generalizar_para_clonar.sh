@@ -3,6 +3,7 @@
 # ASISTENTE POITE - DGES / URUGUAY
 # Sellado y Generalización del Sistema para Clonar con Clonezilla (Linux Sysprep)
 # Ejecutar ÚNICAMENTE en la Máquina Virtual / Imagen Maestra antes de clonar.
+# Autor: Prof. Gabriel Vázquez (Docente de Informática · INET / ANEP)
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -80,6 +80,80 @@ pausar() {
 }
 
 # ==============================================================================
+# GESTIÓN DEL NIVEL DE EXPERIENCIA TÉCNICA DEL POITE
+# ==============================================================================
+
+ARCHIVO_CONFIG_POITE="$DIR_DATOS/config_poite.conf"
+
+obtener_nivel_poite() {
+    local nivel=2
+    if [[ -f "$ARCHIVO_CONFIG_POITE" ]]; then
+        nivel=$(grep -m1 "^NIVEL_POITE=" "$ARCHIVO_CONFIG_POITE" 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+    fi
+    echo "${nivel:-2}"
+}
+
+guardar_nivel_poite() {
+    local nivel="$1"
+    mkdir -p "$DIR_DATOS" 2>/dev/null || true
+    if [[ -f "$ARCHIVO_CONFIG_POITE" ]]; then
+        sed -i '/^NIVEL_POITE=/d' "$ARCHIVO_CONFIG_POITE"
+    fi
+    echo "NIVEL_POITE=$nivel" >> "$ARCHIVO_CONFIG_POITE"
+}
+
+etiqueta_nivel_poite() {
+    local n
+    n=$(obtener_nivel_poite)
+    case "$n" in
+        1) echo -e "${GREEN}🌱 Básico (Asistido)${RESET}" ;;
+        2) echo -e "${YELLOW}🛠️  Intermedio (Admin Aula)${RESET}" ;;
+        3) echo -e "${CYAN}💻 Avanzado (SysAdmin / DevOps)${RESET}" ;;
+        *) echo -e "${YELLOW}🛠️  Intermedio${RESET}" ;;
+    esac
+}
+
+seleccionar_nivel_poite_dialogo() {
+    imprimir_encabezado "🎯 NIVEL DE EXPERIENCIA DEL POITE" "Adapte la interfaz a sus conocimientos técnicos de administración Linux"
+
+    local actual
+    actual=$(obtener_nivel_poite)
+
+    echo -e "En las instituciones educativas uruguayas los docentes y POITEs cuentan con diferentes perfiles:"
+    echo
+    echo -e "  ${GREEN}1) 🌱 MODO BÁSICO / ASISTIDO${RESET} ${BOLD}(Recomendado para docentes sin experiencia previa)${RESET}"
+    echo -e "     • Interfaz ultra-simplificada de 3 botones principales."
+    echo -e "     • Automatizaciones guiadas en 'Piloto Automático' (cero comandos de consola)."
+    echo -e "     • Tareas habituales en 1 clic: encender/apagar aula, poner Internet, hora y alumno."
+    echo
+    echo -e "  ${YELLOW}2) 🛠️  MODO INTERMEDIO / ADMINISTRADOR DE AULA${RESET} ${BOLD}(Perfil Estándar POITE)${RESET}"
+    echo -e "     • Flujo metódico completo DGES (Imagen Maestra -> Clonezilla -> Post-Clonación)."
+    echo -e "     • Menús temáticos categorizados: Red, Usuarios, Mantenimiento e Instalaciones."
+    echo
+    echo -e "  ${CYAN}3) 💻 MODO AVANZADO / SYSADMIN & DEVOPS${RESET} ${BOLD}(Para técnicos e ingenieros)${RESET}"
+    echo -e "     • Consola de comandos ad-hoc de Ansible y ejecución libre en clúster."
+    echo -e "     • Editor directo de inventarios .ini y playbooks YAML."
+    echo -e "     • Escaneos con flags nmap personalizados, auditorías lshw/lspci y sockets Python."
+    echo
+    echo -e "  ${RED}0) 🔙 Cancelar y mantener nivel actual${RESET}"
+    echo
+    echo -ne "${BOLD}Seleccione su nivel de experiencia [1-3] (Actual: $actual): ${RESET}"
+    read -r opt_nivel
+
+    case "$opt_nivel" in
+        1|2|3)
+            guardar_nivel_poite "$opt_nivel"
+            imprimir_exito "Nivel actualizado a: $(etiqueta_nivel_poite)"
+            sleep 1.2
+            ;;
+        *)
+            imprimir_info "Sin cambios."
+            sleep 0.8
+            ;;
+    esac
+}
+
+# ==============================================================================
 # SEGURIDAD Y PRIVILEGIOS
 # ==============================================================================
 
